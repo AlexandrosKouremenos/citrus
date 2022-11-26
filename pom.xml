@@ -21,6 +21,7 @@
 
     <modules>
         <module>aurantium</module>
+        <module>protobuf</module>
     </modules>
 
     <dependencies>
