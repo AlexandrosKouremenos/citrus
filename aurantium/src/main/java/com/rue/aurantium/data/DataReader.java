@@ -32,15 +32,25 @@ public class DataReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataReader.class);
 
-    private static boolean EOF;
+    public static boolean EOF;
 
-    private final ScheduledExecutorService executorService;
+    private ScheduledExecutorService executorService;
 
-    private final ApplicationContext context;
+    private ApplicationContext context;
 
-    private final Queue<Path> queue;
+    private Queue<Path> queue;
+
+    private String filePath;
 
     public DataReader(String filePath) {
+
+//        this.filePath = System.getProperty("filePath");
+        this.filePath = filePath;
+        start();
+
+    }
+
+    protected void start() {
 
         try {
 
@@ -100,7 +110,7 @@ public class DataReader {
 
     }
 
-    private static Runnable publish(String line) {
+    private Runnable publish(String line) {
 
         return () -> {
 
@@ -111,11 +121,5 @@ public class DataReader {
 
 
     }
-
-//    public static void main(String[] args) throws IOException {
-//
-//        DataReader dataReader = new DataReader("/home/alex/Repos/citrus/aurantium/src/main/resources/iot-data/building0-short");
-//
-//    }
 
 }
