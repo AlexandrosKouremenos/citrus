@@ -11,7 +11,7 @@
     </parent>
     <artifactId>aurantium</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>aurantium</name>
+    <name>Aurantium</name>
     <description>aurantium</description>
 
     <properties>
@@ -36,6 +36,13 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-to-slf4j</artifactId>
             <version>2.19.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rue</groupId>
+            <artifactId>protobuf</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
