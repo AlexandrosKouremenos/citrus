@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import protobuf.Building;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -13,7 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.Deque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
@@ -28,17 +29,19 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class DataReader {
 
-    public static final long PUBLISH_DELAY = parseLong(System.getProperty("publish.delay", "1"));
+    public static final long PUBLISH_DELAY = parseLong(System.getProperty("publish.delay", "0"));
 
     private static final Logger LOG = LoggerFactory.getLogger(DataReader.class);
 
     public static boolean EOF;
 
+    private static int buildingId = 0;
+
     private ScheduledExecutorService executorService;
 
     private ApplicationContext context;
 
-    private Queue<Path> queue;
+    private Deque<Path> queue;
 
     private String filePath;
 
@@ -66,9 +69,8 @@ public class DataReader {
         context = new AnnotationConfigApplicationContext(Scheduler.class);
         executorService = (ScheduledExecutorService) context.getBean(TASK_SCHEDULER);
 
-        while (!queue.isEmpty()) {
+        for (Path path : queue) {
 
-            Path path = queue.poll();
             LOG.info("Handling file [{}].", path);
 
             try {
@@ -76,16 +78,17 @@ public class DataReader {
                 BufferedReader reader = new BufferedReader(new FileReader(path.toFile()));
                 EOF = false;
 
+                DataParser dataParser = new DataParser(buildingId++);
                 String line = reader.readLine();
-                ScheduledFuture<?> future = schedulePublish(line);
+                ScheduledFuture<?> future = schedulePublish(line, dataParser);
 
                 while (!EOF) {
 
-                    if (future.isDone()) {
+                    if (future == null || future.isDone()) {
 
                         line = reader.readLine();
                         if (line == null) EOF = true;
-                        else future = schedulePublish(line);
+                        else future = schedulePublish(line, dataParser);
 
                     }
 
@@ -103,22 +106,24 @@ public class DataReader {
 
     }
 
-    private ScheduledFuture<?> schedulePublish(String line) {
+    private ScheduledFuture<?> schedulePublish(String line, DataParser dataParser) {
 
-        Runnable readData = publish(line);
-        return executorService.schedule(readData, PUBLISH_DELAY, SECONDS);
+        Building building = dataParser.parseData(line);
+        if (building == null) return null;
+
+        Runnable publishData = publish(building);
+        return executorService.schedule(publishData, PUBLISH_DELAY, SECONDS);
 
     }
 
-    private Runnable publish(String line) {
+    private Runnable publish(Building building) {
 
         return () -> {
 
-            // TODO: Implement business logic
-            System.out.println(line);
+            // TODO: Implement business logic.
+            System.out.println(building);
 
         };
-
 
     }
 

@@ -5,5 +5,5 @@ package protobuf;
 
 message Outlet {
   string id = 1;
-  int32 consumption = 2;
+  string consumption = 2;
 }
