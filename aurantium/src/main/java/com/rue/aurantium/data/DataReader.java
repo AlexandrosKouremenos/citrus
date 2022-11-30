@@ -29,7 +29,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class DataReader {
 
-    public static final long PUBLISH_DELAY = parseLong(System.getProperty("publish.delay", "0"));
+    public static final long PUBLISH_DELAY = parseLong(System.getProperty("publish.delay", "1"));
 
     private static final Logger LOG = LoggerFactory.getLogger(DataReader.class);
 
@@ -49,11 +49,10 @@ public class DataReader {
 
 //        this.filePath = System.getProperty("filePath");
         this.filePath = filePath;
-        start();
 
     }
 
-    protected void start() {
+    public void start() {
 
         try {
 

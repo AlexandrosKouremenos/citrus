@@ -33,7 +33,7 @@ public class DataParser {
 
     }
 
-    public Building parseData(String line) {
+    protected Building parseData(String line) {
 
         String[] consumptions = line.split(COMMA);
 
