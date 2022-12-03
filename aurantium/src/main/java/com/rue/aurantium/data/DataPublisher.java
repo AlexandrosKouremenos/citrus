@@ -27,17 +27,21 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * Simulates the data produced from one building.
 * */
 
-public class DataReader {
+public class DataPublisher {
 
     public static final long PUBLISH_DELAY = parseLong(System.getProperty("publish.delay", "1"));
 
-    private static final Logger LOG = LoggerFactory.getLogger(DataReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DataPublisher.class);
 
     public static boolean EOF;
 
     private static int buildingId = 0;
 
+    private static boolean shuttingDown = false;
+
     private ScheduledExecutorService executorService;
+
+    private BufferedReader reader;
 
     private ApplicationContext context;
 
@@ -45,7 +49,7 @@ public class DataReader {
 
     private String filePath;
 
-    public DataReader(String filePath) {
+    public DataPublisher(String filePath) {
 
 //        this.filePath = System.getProperty("filePath");
         this.filePath = filePath;
@@ -63,25 +67,36 @@ public class DataReader {
 
             directoryStream.close();
 
-        } catch (IOException e) { throw new RuntimeException(e); }
+        } catch (IOException e) {
+
+            LOG.error("Path was not a directory.");
+            throw new RuntimeException(e);
+
+        }
 
         context = new AnnotationConfigApplicationContext(Scheduler.class);
         executorService = (ScheduledExecutorService) context.getBean(TASK_SCHEDULER);
 
         for (Path path : queue) {
 
+            if (shuttingDown) {
+                LOG.info("Skipping other files.");
+                break;
+            }
+
             LOG.info("Handling file [{}].", path);
 
             try {
 
-                BufferedReader reader = new BufferedReader(new FileReader(path.toFile()));
+                reader = new BufferedReader(new FileReader(path.toFile()));
+
                 EOF = false;
 
                 DataParser dataParser = new DataParser(buildingId++);
                 String line = reader.readLine();
                 ScheduledFuture<?> future = schedulePublish(line, dataParser);
 
-                while (!EOF) {
+                while (!EOF && !shuttingDown) {
 
                     if (future == null || future.isDone()) {
 
@@ -93,7 +108,8 @@ public class DataReader {
 
                 }
 
-                LOG.info("File [{}] handled. Closing reader.", path);
+                LOG.info("File [{}] handled.", path);
+                LOG.info("Closing reader.");
                 reader.close();
 
             } catch (IOException e) { throw new RuntimeException(e); }
@@ -123,6 +139,13 @@ public class DataReader {
             System.out.println(building);
 
         };
+
+    }
+
+    private void shutdown() {
+
+        LOG.info("Shutting down application...");
+        shuttingDown = true;
 
     }
 

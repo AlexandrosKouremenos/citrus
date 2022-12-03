@@ -21,6 +21,9 @@ public class Scheduler {
         ThreadPoolTaskScheduler poolTaskScheduler = new ThreadPoolTaskScheduler();
         poolTaskScheduler.setPoolSize(1);
         poolTaskScheduler.setThreadNamePrefix(TASK_SCHEDULER);
+        poolTaskScheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+        poolTaskScheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        poolTaskScheduler.setWaitForTasksToCompleteOnShutdown(false);
         poolTaskScheduler.initialize();
         return poolTaskScheduler.getScheduledExecutor();
 
