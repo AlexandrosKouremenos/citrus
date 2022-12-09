@@ -15,10 +15,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 import static com.rue.aurantium.data.Scheduler.TASK_SCHEDULER;
+import static com.rue.aurantium.mqtt.BuildingTopic.getBuildingTopic;
 import static java.lang.Long.parseLong;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -27,19 +29,19 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * Simulates the data produced from one building.
 * */
 
-public class DataPublisher {
+abstract public class DataPublisher {
 
     public static final long PUBLISH_DELAY = parseLong(System.getProperty("publish.delay", "1"));
 
     private static final Logger LOG = LoggerFactory.getLogger(DataPublisher.class);
 
+    private static final int BUILDING_ID = Integer.parseInt(System.getProperty("building.id"));
+
     public static boolean EOF;
 
-    private static int buildingId = 0;
+    protected static boolean shuttingDown = false;
 
-    private static boolean shuttingDown = false;
-
-    private ScheduledExecutorService executorService;
+    private ScheduledExecutorService executor;
 
     private BufferedReader reader;
 
@@ -47,14 +49,9 @@ public class DataPublisher {
 
     private Deque<Path> queue;
 
-    private String filePath;
+    private final String filePath;
 
-    public DataPublisher(String filePath) {
-
-//        this.filePath = System.getProperty("filePath");
-        this.filePath = filePath;
-
-    }
+    public DataPublisher(String filePath) { this.filePath = filePath; }
 
     public void start() {
 
@@ -70,12 +67,15 @@ public class DataPublisher {
         } catch (IOException e) {
 
             LOG.error("Path was not a directory.");
+            shutdown();
             throw new RuntimeException(e);
 
         }
 
         context = new AnnotationConfigApplicationContext(Scheduler.class);
-        executorService = (ScheduledExecutorService) context.getBean(TASK_SCHEDULER);
+        executor = (ScheduledExecutorService) context.getBean(TASK_SCHEDULER);
+
+        LOG.info("Starting publishing to topic [{}].", getBuildingTopic());
 
         for (Path path : queue) {
 
@@ -92,9 +92,9 @@ public class DataPublisher {
 
                 EOF = false;
 
-                DataParser dataParser = new DataParser(buildingId++);
+                DataParser dataParser = new DataParser(BUILDING_ID);
                 String line = reader.readLine();
-                ScheduledFuture<?> future = schedulePublish(line, dataParser);
+                CompletableFuture<?> future = schedulePublish(line, dataParser);
 
                 while (!EOF && !shuttingDown) {
 
@@ -117,36 +117,25 @@ public class DataPublisher {
         }
 
         LOG.info("Shutting down executor.");
-        executorService.shutdown();
+        executor.shutdown();
+        shutdown();
 
     }
 
-    private ScheduledFuture<?> schedulePublish(String line, DataParser dataParser) {
+    private CompletableFuture<?> schedulePublish(String line, DataParser dataParser) {
 
         Building building = dataParser.parseData(line);
         if (building == null) return null;
 
-        Runnable publishData = publish(building);
-        return executorService.schedule(publishData, PUBLISH_DELAY, SECONDS);
+        publish(building);
+        Executor delayedExecutor = CompletableFuture.delayedExecutor(PUBLISH_DELAY, SECONDS, executor);
+
+        return CompletableFuture.runAsync(() -> {}, delayedExecutor); // Dummy Delay
 
     }
 
-    private Runnable publish(Building building) {
+    abstract protected void publish(Building building);
 
-        return () -> {
-
-            // TODO: Implement business logic.
-            System.out.println(building);
-
-        };
-
-    }
-
-    private void shutdown() {
-
-        LOG.info("Shutting down application...");
-        shuttingDown = true;
-
-    }
+    abstract protected void shutdown();
 
 }
