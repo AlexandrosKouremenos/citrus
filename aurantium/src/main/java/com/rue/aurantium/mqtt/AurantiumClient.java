@@ -40,7 +40,7 @@ public class AurantiumClient extends DataPublisher {
                 .identifier(UUID.randomUUID().toString())
                 .buildAsync();
 
-        LOGGER.info("Built client: " + client);
+        LOGGER.info("Client [{}] is built.", client);
         this.publisher = eventPublisher;
         connectClient();
 
@@ -72,7 +72,11 @@ public class AurantiumClient extends DataPublisher {
         client.subscribeWith()
                 .topicFilter(getBuildingTopic())
 //                .callback(mqtt5Publish -> {
-//                    LOGGER.info("Received " + new String(mqtt5Publish.getPayloadAsBytes()) + " from " + mqtt5Publish.getTopic());
+//                    try {
+//                        LOGGER.info("Received \n\t" + Building.parseFrom(mqtt5Publish.getPayloadAsBytes()) + " \n from " + mqtt5Publish.getTopic());
+//                    } catch (InvalidProtocolBufferException e) {
+//                        throw new RuntimeException(e);
+//                    }
 //                })
                 .send()
                 .whenComplete((mqtt5SubAck, throwable) -> {

@@ -43,18 +43,13 @@ abstract public class DataPublisher {
 
     private ScheduledExecutorService executor;
 
-    private BufferedReader reader;
-
-    private ApplicationContext context;
-
-    private Deque<Path> queue;
-
     private final String filePath;
 
     public DataPublisher(String filePath) { this.filePath = filePath; }
 
     public void start() {
 
+        Deque<Path> queue;
         try {
 
             DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(filePath));
@@ -72,7 +67,7 @@ abstract public class DataPublisher {
 
         }
 
-        context = new AnnotationConfigApplicationContext(Scheduler.class);
+        ApplicationContext context = new AnnotationConfigApplicationContext(Scheduler.class);
         executor = (ScheduledExecutorService) context.getBean(TASK_SCHEDULER);
 
         LOG.info("Starting publishing to topic [{}].", getBuildingTopic());
@@ -88,7 +83,7 @@ abstract public class DataPublisher {
 
             try {
 
-                reader = new BufferedReader(new FileReader(path.toFile()));
+                BufferedReader reader = new BufferedReader(new FileReader(path.toFile()));
 
                 EOF = false;
 
