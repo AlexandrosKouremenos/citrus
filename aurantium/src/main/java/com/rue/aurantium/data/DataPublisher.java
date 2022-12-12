@@ -47,7 +47,7 @@ abstract public class DataPublisher {
 
     public DataPublisher(String filePath) { this.filePath = filePath; }
 
-    public void start() {
+    protected void start() {
 
         Deque<Path> queue;
         try {

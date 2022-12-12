@@ -1,11 +1,10 @@
 package com.rue.aurantium.mqtt;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.rue.aurantium.data.DataPublisher;
-import com.rue.aurantium.util.EventPublisher;
-import com.rue.aurantium.util.StartEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import protobuf.Building;
@@ -27,21 +26,17 @@ public class AurantiumClient extends DataPublisher {
 
     private final Mqtt5AsyncClient client;
 
-    private final EventPublisher publisher;
-
-    public AurantiumClient(String filePath, EventPublisher eventPublisher) {
+    public AurantiumClient(String filePath) {
 
         super(filePath);
 
         client = Mqtt5Client.builder()
                 .serverHost(HOST)
-                .serverPort(8883)
-                .sslWithDefaultConfig()
+                .serverPort(1883)
                 .identifier(UUID.randomUUID().toString())
                 .buildAsync();
 
         LOGGER.info("Client [{}] is built.", client);
-        this.publisher = eventPublisher;
         connectClient();
 
     }
@@ -71,13 +66,13 @@ public class AurantiumClient extends DataPublisher {
 
         client.subscribeWith()
                 .topicFilter(getBuildingTopic())
-//                .callback(mqtt5Publish -> {
-//                    try {
-//                        LOGGER.info("Received \n\t" + Building.parseFrom(mqtt5Publish.getPayloadAsBytes()) + " \n from " + mqtt5Publish.getTopic());
-//                    } catch (InvalidProtocolBufferException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                })
+                .callback(mqtt5Publish -> {
+                    try {
+                        LOGGER.info("Received \n\t" + Building.parseFrom(mqtt5Publish.getPayloadAsBytes()) + " \n from " + mqtt5Publish.getTopic());
+                    } catch (InvalidProtocolBufferException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .send()
                 .whenComplete((mqtt5SubAck, throwable) -> {
                     if (throwable != null) {
@@ -88,7 +83,8 @@ public class AurantiumClient extends DataPublisher {
                     } else {
 
                         LOGGER.info("Client [{}] subscribed.", client);
-                        this.publisher.publishEvent(new StartEvent(this));
+//                        eventPublisher.publishEvent(new StartEvent(this));
+                        super.start();
 
                     }
                 });

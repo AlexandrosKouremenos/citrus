@@ -43,8 +43,7 @@ public class PublishBuildingTest {
 
         client = Mqtt5Client.builder()
                 .serverHost(HOST)
-                .serverPort(8883)
-                .sslWithDefaultConfig()
+                .serverPort(1883)
                 .identifier(UUID.randomUUID().toString())
                 .buildAsync();
 
@@ -67,7 +66,8 @@ public class PublishBuildingTest {
     }
 
     public static void pub(Building building){
-        client.connectWith().simpleAuth()
+        client.connectWith()
+            .simpleAuth()
             .username(USERNAME)
             .password(UTF_8.encode(PASSWORD))
             .applySimpleAuth()
