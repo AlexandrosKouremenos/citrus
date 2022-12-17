@@ -31,11 +31,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 abstract public class DataPublisher {
 
-    public static final long PUBLISH_DELAY = parseLong(System.getProperty("publish.delay", "1"));
+    public static final long PUBLISH_DELAY = parseLong(System.getenv("publish.delay"));
+
+    private static final int BUILDING_ID = Integer.parseInt(System.getenv("building.id"));
 
     private static final Logger LOG = LoggerFactory.getLogger(DataPublisher.class);
-
-    private static final int BUILDING_ID = Integer.parseInt(System.getProperty("building.id"));
 
     public static boolean EOF;
 
