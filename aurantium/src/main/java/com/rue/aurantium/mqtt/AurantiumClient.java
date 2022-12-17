@@ -18,11 +18,11 @@ public class AurantiumClient extends DataPublisher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AurantiumClient.class);
 
-    private static final String HOST = System.getProperty("mqtt.host");
+    private static final String HOST = System.getenv("mqtt.host");
 
-    private static final String USERNAME = System.getProperty("mqtt.username");
+    private static final String USERNAME = System.getenv("mqtt.username");
 
-    private static final String PASSWORD = System.getProperty("mqtt.password");
+    private static final String PASSWORD = System.getenv("mqtt.password");
 
     private final Mqtt5AsyncClient client;
 

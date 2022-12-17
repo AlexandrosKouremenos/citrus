@@ -2,7 +2,7 @@ package com.rue.aurantium.mqtt;
 
 public class BuildingTopic {
 
-    private static final String BUILDING_TOPIC = "building/" + System.getProperty("building.id");
+    private static final String BUILDING_TOPIC = "building/" + System.getenv("building.id");
 
     public BuildingTopic() { }
 
