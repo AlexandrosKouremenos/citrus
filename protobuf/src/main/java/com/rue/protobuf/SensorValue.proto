@@ -1,0 +1,11 @@
+syntax = "proto3";
+option java_multiple_files = true;
+
+package protobuf;
+
+message SensorValue {
+
+  string id = 1;
+  float metrics = 2;
+
+}

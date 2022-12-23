@@ -1,0 +1,10 @@
+syntax = "proto3";
+import "SensorValue.proto";
+option java_multiple_files = true;
+
+package protobuf;
+
+message Machine {
+  string id = 1;
+  repeated SensorValue sensorValues = 2;
+}

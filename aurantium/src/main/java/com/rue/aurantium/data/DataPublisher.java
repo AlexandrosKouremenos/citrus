@@ -1,10 +1,11 @@
 package com.rue.aurantium.data;
 
+import com.rue.aurantium.data.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import protobuf.Building;
+import protobuf.Machine;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -20,20 +21,20 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static com.rue.aurantium.data.Scheduler.TASK_SCHEDULER;
-import static com.rue.aurantium.mqtt.BuildingTopic.getBuildingTopic;
+import static com.rue.aurantium.mqtt.MachineTopic.getMachineTopic;
 import static java.lang.Long.parseLong;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Takes a folder as an input. Read its files line by line and publish them with 1 sec delay.
  * Simulates the data produced from one building.
-* */
+ * */
 
 abstract public class DataPublisher {
 
     public static final long PUBLISH_DELAY = parseLong(System.getenv("publish.delay"));
 
-    private static final int BUILDING_ID = Integer.parseInt(System.getenv("building.id"));
+    private static final String MACHINE_ID = System.getenv("machine.id");
 
     private static final Logger LOG = LoggerFactory.getLogger(DataPublisher.class);
 
@@ -70,7 +71,7 @@ abstract public class DataPublisher {
         ApplicationContext context = new AnnotationConfigApplicationContext(Scheduler.class);
         executor = (ScheduledExecutorService) context.getBean(TASK_SCHEDULER);
 
-        LOG.info("Starting publishing to topic [{}].", getBuildingTopic());
+        LOG.info("Starting publishing to topic [{}].", getMachineTopic());
 
         for (Path path : queue) {
 
@@ -87,9 +88,9 @@ abstract public class DataPublisher {
 
                 EOF = false;
 
-                DataParser dataParser = new DataParser(BUILDING_ID);
+                DataParser machineDataParser = new DataParser(MACHINE_ID);
                 String line = reader.readLine();
-                CompletableFuture<?> future = schedulePublish(line, dataParser);
+                CompletableFuture<?> future = schedulePublish(line, machineDataParser);
 
                 while (!EOF && !shuttingDown) {
 
@@ -97,7 +98,7 @@ abstract public class DataPublisher {
 
                         line = reader.readLine();
                         if (line == null) EOF = true;
-                        else future = schedulePublish(line, dataParser);
+                        else future = schedulePublish(line, machineDataParser);
 
                     }
 
@@ -117,19 +118,19 @@ abstract public class DataPublisher {
 
     }
 
-    private CompletableFuture<?> schedulePublish(String line, DataParser dataParser) {
+    private CompletableFuture<?> schedulePublish(String line, DataParser machineDataParser) {
 
-        Building building = dataParser.parseData(line);
-        if (building == null) return null;
+        Machine machine = machineDataParser.parseData(line);
+        if (machine == null) return null;
 
-        publish(building);
+        publish(machine);
         Executor delayedExecutor = CompletableFuture.delayedExecutor(PUBLISH_DELAY, SECONDS, executor);
 
         return CompletableFuture.runAsync(() -> {}, delayedExecutor); // Dummy Delay
 
     }
 
-    abstract protected void publish(Building building);
+    abstract protected void publish(Machine machine);
 
     abstract protected void shutdown();
 

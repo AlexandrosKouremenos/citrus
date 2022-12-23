@@ -11,9 +11,9 @@ COPY ${data_folder} /data
 ENV filePath="/data"
 
 RUN apt-get update && \
-    apt-get -y install sudo
-RUN apt-get -y install mosquitto mosquitto-clients
-#RUN apt -y install openjdk-17-jdk openjdk-17-jre
+  apt-get -y install mosquitto mosquitto-clients && \
+  apt-get -y install openjdk-17-jdk openjdk-17-jre
+#    apt-get -y install sudo
 
 #RUN adduser --disabled-password --gecos '' docker
 #RUN adduser docker sudo

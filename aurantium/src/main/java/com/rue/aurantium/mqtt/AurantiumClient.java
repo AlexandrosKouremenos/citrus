@@ -7,11 +7,11 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.rue.aurantium.data.DataPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import protobuf.Building;
+import protobuf.Machine;
 
 import java.util.UUID;
 
-import static com.rue.aurantium.mqtt.BuildingTopic.getBuildingTopic;
+import static com.rue.aurantium.mqtt.MachineTopic.getMachineTopic;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class AurantiumClient extends DataPublisher {
@@ -65,10 +65,10 @@ public class AurantiumClient extends DataPublisher {
     private void subscribe() {
 
         client.subscribeWith()
-                .topicFilter(getBuildingTopic())
+                .topicFilter(getMachineTopic())
                 .callback(mqtt5Publish -> {
                     try {
-                        LOGGER.info("Received \n\t" + Building.parseFrom(mqtt5Publish.getPayloadAsBytes()) + " \n from " + mqtt5Publish.getTopic());
+                        LOGGER.info("Received \n\t" + Machine.parseFrom(mqtt5Publish.getPayloadAsBytes()) + " \n from " + mqtt5Publish.getTopic());
                     } catch (InvalidProtocolBufferException e) {
                         throw new RuntimeException(e);
                     }
@@ -93,12 +93,12 @@ public class AurantiumClient extends DataPublisher {
     }
 
 
-    public void publish(Building building) {
+    public void publish(Machine machine) {
 
         client.publishWith()
-                .topic(getBuildingTopic())
+                .topic(getMachineTopic())
                 .qos(MqttQos.AT_LEAST_ONCE)
-                .payload(building.toByteArray())
+                .payload(machine.toByteArray())
                 .send();
 
     }
