@@ -1,10 +1,8 @@
 package com.rue.aurantium.data;
 
-
 import protobuf.Machine;
 import protobuf.SensorValue;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -17,7 +15,7 @@ public class DataParser {
     private static final Pattern PATTERN = Pattern.compile("[LHM]");
 
     private static final Map <String, Float> SENSOR_TYPES =
-            Map.of("L", 1F, "M", 2F, "H", 3F);
+            Map.of("L", 0F, "M", 1F, "H", 2F);
 
     private final Machine.Builder machineBuilder;
 

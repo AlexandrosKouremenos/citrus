@@ -1,6 +1,5 @@
 package com.rue.aurantium.data;
 
-import com.rue.aurantium.data.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -32,7 +31,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 abstract public class DataPublisher {
 
-    public static final long PUBLISH_DELAY = parseLong(System.getenv("publish.delay"));
+    public static final String PUBLISH_DELAY = System.getenv("publish.delay");
 
     private static final String MACHINE_ID = System.getenv("machine.id");
 
@@ -124,7 +123,7 @@ abstract public class DataPublisher {
         if (machine == null) return null;
 
         publish(machine);
-        Executor delayedExecutor = CompletableFuture.delayedExecutor(PUBLISH_DELAY, SECONDS, executor);
+        Executor delayedExecutor = CompletableFuture.delayedExecutor(parseLong(PUBLISH_DELAY), SECONDS, executor);
 
         return CompletableFuture.runAsync(() -> {}, delayedExecutor); // Dummy Delay
 
