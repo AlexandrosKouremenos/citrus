@@ -1,21 +1,19 @@
-package com.rue.aurantium.mqtt;
+package com.rue.sunki.mqtt;
 
-import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.rue.aurantium.data.DataPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import protobuf.Machine;
 
 import java.util.UUID;
 
-import static com.rue.aurantium.mqtt.MachineTopic.getMachineTopic;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class AurantiumClient extends DataPublisher {
+public class SunkiClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AurantiumClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SunkiClient.class);
 
     private static final String HOST = System.getenv("mqtt.host");
 
@@ -25,9 +23,7 @@ public class AurantiumClient extends DataPublisher {
 
     private final Mqtt5AsyncClient client;
 
-    public AurantiumClient(String filePath) {
-
-        super(filePath);
+    public SunkiClient() {
 
         client = Mqtt5Client.builder()
                 .serverHost(HOST)
@@ -37,10 +33,10 @@ public class AurantiumClient extends DataPublisher {
 
         LOGGER.info("Client [{}] is built.", client);
         connectClient();
-
     }
 
-    private void connectClient() {
+
+    public void connectClient() {
 
         client.connectWith()
                 .simpleAuth()
@@ -53,7 +49,7 @@ public class AurantiumClient extends DataPublisher {
                     else {
 
                         LOGGER.info("Client [{}] is connected.", client);
-                        super.start();
+                        subscribe();
 
                     }
 
@@ -61,22 +57,37 @@ public class AurantiumClient extends DataPublisher {
 
     }
 
+    private void subscribe() {
 
-    public void publish(Machine machine) {
+        client.subscribeWith()
+                .topicFilter(getMachineTopic())
+                .callback(mqtt5Publish -> {
+                    try {
 
-        client.publishWith()
-                .topic(getMachineTopic())
-                .qos(MqttQos.AT_LEAST_ONCE)
-                .payload(machine.toByteArray())
-                .send();
+                        LOGGER.info("Received \n\t" +
+                                Machine.parseFrom(mqtt5Publish.getPayloadAsBytes()) +
+                                " \n from " +
+                                mqtt5Publish.getTopic());
+
+                    } catch (InvalidProtocolBufferException e) { throw new RuntimeException(e); }
+
+                })
+                .send()
+                .whenComplete((mqtt5SubAck, throwable) -> {
+                    if (throwable != null) {
+
+                        LOGGER.error("Failed to subscribe.", throwable);
+                        shutdown();
+
+                    } else LOGGER.info("Client [{}] subscribed.", client);
+
+                });
 
     }
 
-    @Override
     protected void shutdown() {
 
         LOGGER.info("Shutting down application...");
-        shuttingDown = true;
 
         client.disconnect().whenComplete((ack, throwable) -> {
 
@@ -84,7 +95,9 @@ public class AurantiumClient extends DataPublisher {
             else LOGGER.error("Shit.. ",  throwable);
 
         });
-        
+
     }
+
+    private static String getMachineTopic() { return "machine/#"; }
 
 }

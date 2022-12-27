@@ -22,6 +22,7 @@
 
     <modules>
         <module>aurantium</module>
+        <module>sunki</module>
         <module>protobuf</module>
     </modules>
 
