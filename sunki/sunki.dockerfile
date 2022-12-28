@@ -6,18 +6,14 @@ RUN apt-get update && \
 
 COPY scripts/mosquitto.conf /etc/mosquitto/mosquitto.conf
 
+EXPOSE 1883
+
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} app/app.jar
 
-RUN mkdir -p "app/data"
-ARG data_folder
-COPY ${data_folder} app/data
-ENV filePath="/app/data"
-
 WORKDIR /app
 
-EXPOSE 1883
-EXPOSE 8080
+EXPOSE 8081
 
-#CMD ["/bin/bash", "-c", "mosquitto -d;java -jar app.jar"]
-CMD ["/bin/bash", "-c", "java -jar app.jar"]
+CMD ["/bin/bash", "-c", "mosquitto -d;java -jar app.jar"]
+#CMD ["/bin/bash", "-c", "java -jar app.jar"]

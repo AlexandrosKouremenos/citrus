@@ -8,14 +8,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.rue.protobuf.SensorTypes.SENSOR_TYPES;
+
 public class DataParser {
 
     private static final String COMMA = ",";
 
     private static final Pattern PATTERN = Pattern.compile("[LHM]");
-
-    private static final Map <String, Float> SENSOR_TYPES =
-            Map.of("L", 0F, "M", 1F, "H", 2F);
 
     private final Machine.Builder machineBuilder;
 

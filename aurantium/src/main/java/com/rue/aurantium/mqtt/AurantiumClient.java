@@ -1,5 +1,6 @@
 package com.rue.aurantium.mqtt;
 
+import com.hivemq.client.internal.mqtt.lifecycle.MqttClientAutoReconnectImpl;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
@@ -33,6 +34,10 @@ public class AurantiumClient extends DataPublisher {
                 .serverHost(HOST)
                 .serverPort(1883)
                 .identifier(UUID.randomUUID().toString())
+                .automaticReconnect(MqttClientAutoReconnectImpl.DEFAULT)
+                .addConnectedListener(context -> LOGGER.info("Client received a ConnAck."))
+                .addDisconnectedListener(context ->
+                        LOGGER.warn("Client is not connected yet or will disconnect."))
                 .buildAsync();
 
         LOGGER.info("Client [{}] is built.", client);

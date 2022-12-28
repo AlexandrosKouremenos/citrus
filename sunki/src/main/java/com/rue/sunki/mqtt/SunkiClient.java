@@ -1,6 +1,7 @@
 package com.rue.sunki.mqtt;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.hivemq.client.internal.mqtt.lifecycle.MqttClientAutoReconnectImpl;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import org.slf4j.Logger;
@@ -29,6 +30,10 @@ public class SunkiClient {
                 .serverHost(HOST)
                 .serverPort(1883)
                 .identifier(UUID.randomUUID().toString())
+                .automaticReconnect(MqttClientAutoReconnectImpl.DEFAULT)
+                .addConnectedListener(context -> LOGGER.info("Client received a ConnAck."))
+                .addDisconnectedListener(context ->
+                        LOGGER.warn("Client is not connected yet or will disconnect."))
                 .buildAsync();
 
         LOGGER.info("Client [{}] is built.", client);

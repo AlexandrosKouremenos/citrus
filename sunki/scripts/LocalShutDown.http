@@ -1,1 +1,4 @@
 POST http://localhost:8081/actuator/shutdown
+
+###
+POST http://172.17.0.2:8081/actuator/shutdown
