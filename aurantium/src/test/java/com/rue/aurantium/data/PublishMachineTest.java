@@ -86,20 +86,26 @@ public class PublishMachineTest {
 
     }
 
-    public static void pub(Machine machine){
+    public static void pub(Machine machine) {
+
         client.connectWith()
-            .simpleAuth()
-            .username(USERNAME)
-            .password(UTF_8.encode(PASSWORD))
-            .applySimpleAuth()
-            .send()
-            .thenAccept(connAck -> System.out.println("connected " + connAck))
-            .thenCompose(v -> client.publishWith().topic("demo/topic/b").qos(MqttQos.EXACTLY_ONCE).payload(machine.toByteArray()).send().whenComplete(((mqtt5PublishResult, throwable) -> {
-                System.out.println("Published: " + machine.toString());
-            } )))
-            .thenAccept(publishResult -> System.out.println("published " + publishResult))
-            .thenCompose(v -> client.disconnect())
-            .thenAccept(v -> System.out.println("disconnected"));
+                .simpleAuth()
+                .username(USERNAME)
+                .password(UTF_8.encode(PASSWORD))
+                .applySimpleAuth()
+                .send()
+                .thenAccept(connAck -> System.out.println("connected " + connAck))
+                .thenCompose(v -> client
+                        .publishWith()
+                        .topic("machine/0")
+                        .qos(MqttQos.EXACTLY_ONCE)
+                        .payload(machine.toByteArray())
+                        .send()
+                        .whenComplete(((mqtt5PublishResult, throwable) -> System.out.println("Published: " + machine))))
+                .thenAccept(publishResult -> System.out.println("published " + publishResult))
+                .thenCompose(v -> client.disconnect())
+                .thenAccept(v -> System.out.println("disconnected"));
+
     }
 
 }

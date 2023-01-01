@@ -1,17 +1,16 @@
 FROM ubuntu:22.04
 
 RUN apt-get update && \
-      apt-get -y install --no-install-recommends --no-install-suggests mosquitto mosquitto-clients && \
       apt-get -y install --no-install-recommends --no-install-suggests openjdk-17-jdk openjdk-17-jre
 
+RUN apt-get -y install --no-install-recommends --no-install-suggests mosquitto mosquitto-clients
+
 COPY scripts/mosquitto.conf /etc/mosquitto/mosquitto.conf
+COPY scripts/passwd /etc/mosquitto/
 
 EXPOSE 1883
 
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app/app.jar
-
-WORKDIR /app
+COPY target/*.jar app.jar
 
 EXPOSE 8081
 

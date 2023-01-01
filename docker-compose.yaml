@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  sunki:
+    image: sunki:latest
+    env_file:
+      - sunki/scripts/env.list
+    network_mode: host
+    ports:
+      - "8081:8081"
+      - "1883:1883"
+
+  aurantium:
+    image: aurantium:machine0
+    env_file:
+      - aurantium/scripts/env.list
+    network_mode: host

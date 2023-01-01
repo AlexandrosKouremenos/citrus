@@ -33,3 +33,4 @@ build/
 .vscode/
 /scripts/env.list
 /scripts/mosquitto.conf
+/scripts/passwd

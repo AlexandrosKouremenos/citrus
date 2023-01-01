@@ -1,23 +1,15 @@
 FROM ubuntu:22.04
 
 RUN apt-get update && \
-      apt-get -y install --no-install-recommends --no-install-suggests mosquitto mosquitto-clients && \
       apt-get -y install --no-install-recommends --no-install-suggests openjdk-17-jdk openjdk-17-jre
 
-COPY scripts/mosquitto.conf /etc/mosquitto/mosquitto.conf
+COPY target/*.jar app.jar
 
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app/app.jar
+RUN mkdir -p "data"
 
-RUN mkdir -p "app/data"
 ARG data_folder
-COPY ${data_folder} app/data
-ENV filePath="/app/data"
+COPY ${data_folder} data
 
-WORKDIR /app
+ENV filePath="/data"
 
-EXPOSE 1883
-EXPOSE 8080
-
-#CMD ["/bin/bash", "-c", "mosquitto -d;java -jar app.jar"]
 CMD ["/bin/bash", "-c", "java -jar app.jar"]
