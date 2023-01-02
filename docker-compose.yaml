@@ -11,7 +11,7 @@ services:
       - "1883:1883"
 
   aurantium:
-    image: aurantium:machine0
+    image: aurantium:latest
     env_file:
       - aurantium/scripts/env.list
     network_mode: host
