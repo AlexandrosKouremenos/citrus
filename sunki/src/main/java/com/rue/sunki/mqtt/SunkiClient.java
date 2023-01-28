@@ -18,6 +18,8 @@ public class SunkiClient {
 
     private static final String HOST = System.getenv("mqtt.host");
 
+    private static final Integer PORT = Integer.valueOf(System.getenv("mqtt.port"));
+
     private static final String USERNAME = System.getenv("mqtt.username");
 
     private static final String PASSWORD = System.getenv("mqtt.password");
@@ -28,7 +30,7 @@ public class SunkiClient {
 
         client = Mqtt5Client.builder()
                 .serverHost(HOST)
-                .serverPort(1883)
+                .serverPort(PORT)
                 .identifier(UUID.randomUUID().toString())
                 .automaticReconnect(MqttClientAutoReconnectImpl.DEFAULT)
                 .addConnectedListener(context -> LOGGER.info("Client received a ConnAck."))

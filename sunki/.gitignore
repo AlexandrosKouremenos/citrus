@@ -34,3 +34,4 @@ build/
 /scripts/env.list
 /scripts/mosquitto.conf
 /scripts/passwd
+/cluster-setup/sunki-secret.yaml

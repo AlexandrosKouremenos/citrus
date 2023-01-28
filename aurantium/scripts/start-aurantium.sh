@@ -11,7 +11,7 @@ service_name="aurantium"
 replicas=$1
 
 # Start sunki service.
-docker compose up sunki -d
+#docker compose up sunki -d
 
 # Loop and start the replicas
 for i in $(seq 0 $((replicas - 1)) ); do

@@ -2,7 +2,7 @@ FROM alpine:latest
 
 RUN apk add --no-cache openjdk17-jdk
 
-COPY target/*.jar app.jar
+COPY target/*.jar aurantium.jar
 
 RUN mkdir -p "data"
 
@@ -11,4 +11,4 @@ COPY ${data_folder} data
 
 ENV filePath="/data"
 
-CMD ["/bin/sh", "-c", "java -jar app.jar"]
+CMD ["/bin/sh", "-c", "java -jar aurantium.jar"]
