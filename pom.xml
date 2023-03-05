@@ -24,6 +24,7 @@
         <module>aurantium</module>
         <module>sunki</module>
         <module>protobuf</module>
+        <module>pomelo</module>
     </modules>
 
     <dependencies>
