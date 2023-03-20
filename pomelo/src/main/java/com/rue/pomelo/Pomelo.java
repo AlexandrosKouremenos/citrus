@@ -3,14 +3,16 @@ package com.rue.pomelo;
 import com.rue.pomelo.kafka.PomeloClient;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.Properties;
 
 import static org.apache.kafka.clients.consumer.ConsumerConfig.*;
 
-@Service
+@Service("pomelo")
 public class Pomelo {
 
     public static final Properties PROPS;
@@ -19,11 +21,7 @@ public class Pomelo {
 
     public static final String SERVERS = System.getenv("kafka.bootstrap.servers");
 
-    public static final String MQTT_TOPIC = "mqtt.topic";
-
     public static final String KAFKA_TOPIC = "kafka.topic";
-
-    private static final String MQTT_TOPIC_PROP = System.getenv("mqtt.topic");
 
     private static final String KAFKA_TOPIC_PROP = System.getenv("kafka.topic");
 
@@ -41,18 +39,25 @@ public class Pomelo {
         PROPS.setProperty(AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
 
         PROPS.setProperty(KAFKA_TOPIC, KAFKA_TOPIC_PROP);
-        PROPS.setProperty(MQTT_TOPIC, MQTT_TOPIC_PROP);
 
     }
 
+    private PomeloClient pomeloClient;
+
     public Pomelo() { }
 
-    @Bean(destroyMethod = "shutdown")
-    private PomeloClient getPomeloClient() {
+    @Bean
+    public SimpleAsyncTaskExecutor taskExecutor() { return new SimpleAsyncTaskExecutor(); }
 
-        PomeloClient pomeloClient = new PomeloClient(PROPS);
-        pomeloClient.run();
-        return pomeloClient;
+    @Bean
+    public CommandLineRunner schedulingRunner(SimpleAsyncTaskExecutor executor) {
+
+        return args -> {
+
+            executor.execute(pomeloClient = new PomeloClient(PROPS));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> pomeloClient.shutdown()));
+
+        };
 
     }
 

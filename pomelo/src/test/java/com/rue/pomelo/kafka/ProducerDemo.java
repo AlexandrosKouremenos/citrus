@@ -24,7 +24,7 @@ public class ProducerDemo {
 
     private static final Logger logger = LoggerFactory.getLogger(ProducerDemo.class);
 
-    public static final String KAFKA_TOPIC = "kafka-test";
+    public static final String KAFKA_TOPIC = "machine.0";
 
     public static void main(String[] args) {
 
