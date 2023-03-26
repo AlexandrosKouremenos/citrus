@@ -4,4 +4,4 @@ metadata:
   name: tcp-services
   namespace: ingress-nginx
 data:
-  1883: "default/sunki-service:1883"
+  9092: "default/pomelo-service:9092"

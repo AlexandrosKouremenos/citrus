@@ -373,8 +373,8 @@ spec:
       port: 443
       protocol: TCP
       targetPort: https
-    - name: proxied-broker
-      port: 1883
+    - name: kafka-cluster
+      port: 9092
       protocol: TCP
   selector:
     app.kubernetes.io/component: controller
@@ -490,9 +490,9 @@ spec:
             - containerPort: 8443
               name: webhook
               protocol: TCP
-            - name: proxied-broker
-              containerPort: 1883
-              hostPort: 1883
+            - name: kafka-cluster
+              containerPort: 9092
+              hostPort: 9092
           readinessProbe:
             failureThreshold: 3
             httpGet:

@@ -1,33 +1,33 @@
 kind: Pod
 apiVersion: v1
 metadata:
-  name: sunki-pod
+  name: pomelo-pod
   labels:
-    app: sunki
+    app: pomelo
 spec:
   containers:
-    - name: sunki
-      image: localhost:5001/sunki:latest
+    - name: pomelo
+      image: localhost:5001/pomelo:latest
       imagePullPolicy: IfNotPresent
 #      ports:
 #        - containerPort: 1883
 #        - containerPort: 8081
       env:
-        - name: mqtt.host
+        - name: kafka.bootstrap.servers
           valueFrom:
             secretKeyRef:
-              name: sunki-secret
-              key: mqtt.host
+              name: pomelo-secret
+              key: kafka.bootstrap.servers
               optional: false
-        - name: mqtt.username
+        - name: kafka.group.id
           valueFrom:
             secretKeyRef:
-              name: sunki-secret
-              key: mqtt.username
+              name: pomelo-secret
+              key: kafka.group.id
               optional: false
-        - name: mqtt.password
+        - name: kafka.topic
           valueFrom:
             secretKeyRef:
-              name: sunki-secret
-              key: mqtt.password
+              name: pomelo-secret
+              key: kafka.topic
               optional: false

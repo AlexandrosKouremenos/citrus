@@ -15,3 +15,9 @@ services:
     env_file:
       - aurantium/scripts/env.list
     network_mode: host
+
+  pomelo:
+    image: pomelo:latest
+    env_file:
+      - pomelo/scripts/env.list
+    network_mode: host

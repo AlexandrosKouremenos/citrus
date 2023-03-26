@@ -1,29 +1,29 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sunki-ingress
+  name: pomelo-ingress
 spec:
 #  defaultBackend:
 #    service:
-#      name: sunki-service
+#      name: pomelo-service
 #      port:
 #        name: broker
   ingressClassName: nginx
   rules:
-#    - host: sunki.ingress
+#    - host: pomelo.ingress
     - http:
         paths:
           - pathType: Prefix
             path: /actuator
             backend:
               service:
-                name: sunki-service
+                name: pomelo-service
                 port:
                   name: actuator
           - pathType: Prefix
             path: /
             backend:
               service:
-                name: sunki-service
+                name: pomelo-service
                 port:
-                  name: broker
+                  name: kafka-cluster

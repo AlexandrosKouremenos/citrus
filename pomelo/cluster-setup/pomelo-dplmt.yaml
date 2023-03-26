@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pomelo
+  labels:
+    app: pomelo
+spec:
+  replicas: 3
+  template:
+    metadata:
+      name: pomelo
+      labels:
+        app: pomelo
+    spec:
+      containers:
+        - name: pomelo
+          image: localhost:5001/pomelo:latest
+          imagePullPolicy: Always
+          ports:
+            - name: kafka-cluster
+              containerPort: 9092
+            - name: actuator
+              containerPort: 8085
+          env:
+            - name: kafka.bootstrap.servers
+              valueFrom:
+                secretKeyRef:
+                  name: pomelo-secret
+                  key: kafka.bootstrap.servers
+                  optional: false
+            - name: kafka.group.id
+              valueFrom:
+                secretKeyRef:
+                  name: pomelo-secret
+                  key: kafka.group.id
+                  optional: false
+            - name: kafka.topic
+              valueFrom:
+                secretKeyRef:
+                  name: pomelo-secret
+                  key: kafka.topic
+                  optional: false
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: pomelo
