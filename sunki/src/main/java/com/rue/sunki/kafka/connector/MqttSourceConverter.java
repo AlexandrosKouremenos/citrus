@@ -10,20 +10,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
-import static com.rue.sunki.kafka.connector.util.MqttSourceConnectorConfig.KAFKA_TOPIC;
-
 public class MqttSourceConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttSourceConverter.class);
 
-    public static SourceRecord convert(MqttSourceConnectorConfig sourceConnectorConfig,
-                                   Mqtt5Publish mqttMessage) {
+    public static SourceRecord convert(Mqtt5Publish mqttMessage) {
 
         LOGGER.info("Converting message type [{}] to type [{}].", Mqtt5Publish.class, SourceRecord.class);
 
         return new SourceRecord(new HashMap<>(),
                 new HashMap<>(),
-                sourceConnectorConfig.getString(KAFKA_TOPIC),
+                mqttMessage.getTopic().toString().replace("/", "."),
                 null,
                 Schema.STRING_SCHEMA,
                 mqttMessage.getTopic(),

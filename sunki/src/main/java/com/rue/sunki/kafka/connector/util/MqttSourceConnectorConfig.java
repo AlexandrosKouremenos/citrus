@@ -30,7 +30,7 @@ public class MqttSourceConnectorConfig extends AbstractConfig {
     public static final String MQTT_PASSWORD_DOC = "Password for MQTT authentication.";
 
     public static final String KAFKA_TOPIC = "kafka.topic";
-    public static final String KAFKA_TOPIC_DOC = "List of Kafka topics.";
+    public static final String KAFKA_TOPIC_DOC = "Kafka topic.";
 
     public MqttSourceConnectorConfig(Map<?, ?> originals) { super(configDef(), originals); }
 

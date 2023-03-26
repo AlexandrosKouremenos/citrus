@@ -1,0 +1,31 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: sunki-cluster
+  annotations:
+#  # use-connector-resources configures this KafkaConnect
+#  # to use KafkaConnector resources to avoid
+#  # needing to call the Connect REST API directly
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 3.4.0
+  replicas: 3
+  bootstrapServers: {{kafka-external-bootstrap}}
+  image: localhost:5001/sunki-connector:latest
+  config:
+    group.id: sunki
+    offset.storage.topic: sunki-cluster-offsets
+    config.storage.topic: sunki-cluster-configs
+    status.storage.topic: sunki-cluster-status
+    # -1 means it will use the default replication factor configured in the broker
+    config.storage.replication.factor: 3
+    offset.storage.replication.factor: 3
+    status.storage.replication.factor: 3
+    config.providers: file
+    config.providers.file.class: org.apache.kafka.common.config.provider.FileConfigProvider
+#    config.providers.file.path: /opt/kafka/external-configuration/mqtt-credentials/mqtt.properties
+  externalConfiguration:
+    volumes:
+      - name: mqtt-credentials
+        secret:
+          secretName: sunki-secret

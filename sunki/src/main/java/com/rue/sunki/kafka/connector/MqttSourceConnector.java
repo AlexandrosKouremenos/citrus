@@ -35,6 +35,7 @@ public class MqttSourceConnector extends SourceConnector {
     @Override
     public Class<? extends Task> taskClass() { return MqttSourceTask.class; }
 
+    // TODO: Find how to actually utilize multiple tasks.
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
 

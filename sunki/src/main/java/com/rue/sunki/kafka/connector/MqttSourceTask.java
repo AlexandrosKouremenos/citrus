@@ -97,7 +97,7 @@ public class MqttSourceTask extends SourceTask {
 
     private void convertToKafka(Mqtt5Publish mqttMessage) {
 
-        SourceRecord sourceRecord = convert(sourceConnectorConfig, mqttMessage);
+        SourceRecord sourceRecord = convert(mqttMessage);
         queue.add(sourceRecord);
 
     }
