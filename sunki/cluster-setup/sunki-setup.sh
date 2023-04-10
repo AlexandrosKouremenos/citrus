@@ -1,5 +1,4 @@
 #!/bin/bash
-#set -o errexit
 
 # create registry container unless it already exists
 reg_name='citrus-registry'

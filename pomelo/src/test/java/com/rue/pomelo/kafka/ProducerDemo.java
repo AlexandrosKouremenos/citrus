@@ -8,23 +8,24 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.config.TopicConfig;
-import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.common.serialization.BytesSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.kafka.common.utils.Bytes;
+import protobuf.Machine;
+import protobuf.SensorValue;
 
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 
 public class ProducerDemo {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProducerDemo.class);
-
     public static final String KAFKA_TOPIC = "machine.0";
+
+    public static final String OUTPUT_TOPIC = "out.0";
 
     public static void main(String[] args) {
 
@@ -35,42 +36,42 @@ public class ProducerDemo {
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, BytesSerializer.class.getName());
 
-        KafkaProducer<String, byte[]> producer = new KafkaProducer<>(properties);
+        KafkaProducer<String, Bytes> producer = new KafkaProducer<>(properties);
+
+        Machine machine = getMachine();
 
         // create a producer record
-        ProducerRecord<String, byte[]> producerRecord =
-                new ProducerRecord<>(KAFKA_TOPIC, "test","hello world".getBytes());
+        ProducerRecord<String, Bytes> producerRecord =
+                new ProducerRecord<>(KAFKA_TOPIC, "test", Bytes.wrap(machine.toByteArray()));
 
         try (Admin admin = Admin.create(properties)) {
 
-            String topicName = KAFKA_TOPIC;
             int partitions = 1;
             short replicationFactor = 1;
 
             // Create a compacted topic
-            CreateTopicsResult result = admin.createTopics(
-                    singleton(new NewTopic(topicName, partitions, replicationFactor)
+            CreateTopicsResult result = admin.createTopics(Arrays.asList(
+                    new NewTopic(KAFKA_TOPIC, partitions, replicationFactor)
                             .configs(singletonMap(TopicConfig.CLEANUP_POLICY_CONFIG,
-                                    TopicConfig.CLEANUP_POLICY_COMPACT))));
+                                    TopicConfig.CLEANUP_POLICY_COMPACT)),
+                    new NewTopic(OUTPUT_TOPIC, partitions, replicationFactor)
+                            .configs(singletonMap(TopicConfig.CLEANUP_POLICY_CONFIG,
+                                    TopicConfig.CLEANUP_POLICY_COMPACT)))
+            );
 
             // Call values() to get the result for a specific topic
-            KafkaFuture<Void> future = result.values().get(topicName);
+            KafkaFuture<Void> future = result.values().get(KAFKA_TOPIC);
 
             // Call get() to block until the topic creation is complete or has failed
             // if creation failed the ExecutionException wraps the underlying cause.
             future.get();
 
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+            future = result.values().get(OUTPUT_TOPIC);
+            future.get();
 
-/*
-*
-* kafka.topic=kafka-test;mqtt.topic=mqtt-test;kafka.bootstrap.servers=localhost:9092;kafka.group.id=1
-*
-* */
+        } catch (ExecutionException | InterruptedException e) { throw new RuntimeException(e); }
 
         Scanner scanner = new Scanner(System.in);
         boolean r = true;
@@ -89,6 +90,44 @@ public class ProducerDemo {
 
         producer.flush();
         producer.close();
+
+    }
+
+    private static Machine getMachine() {
+
+        SensorValue typeSensor = SensorValue.newBuilder()
+                .setId("Type")
+                .setMetrics(1F)
+                .build();
+
+        SensorValue airSensor = SensorValue.newBuilder()
+                .setId("Air")
+                .setMetrics(12)
+                .build();
+
+        SensorValue processSensor = SensorValue.newBuilder()
+                .setId("Process")
+                .setMetrics(112)
+                .build();
+
+        SensorValue rotationalSensor = SensorValue.newBuilder()
+                .setId("Rotational")
+                .setMetrics(1122)
+                .build();
+
+        SensorValue torqueSensor = SensorValue.newBuilder()
+                .setId("Torque")
+                .setMetrics(14)
+                .build();
+
+        return Machine.newBuilder()
+                .setId("0")
+                .addSensorValues(typeSensor)
+                .addSensorValues(airSensor)
+                .addSensorValues(processSensor)
+                .addSensorValues(rotationalSensor)
+                .addSensorValues(torqueSensor)
+                .build();
 
     }
 

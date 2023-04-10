@@ -40,6 +40,12 @@ spec:
                   name: pomelo-secret
                   key: kafka.topic
                   optional: false
+            - name: num.threads
+              valueFrom:
+                secretKeyRef:
+                  name: pomelo-secret
+                  key: num.threads
+                  optional: false
       restartPolicy: Always
   selector:
     matchLabels:

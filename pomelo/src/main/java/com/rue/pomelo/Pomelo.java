@@ -1,64 +1,47 @@
 package com.rue.pomelo;
 
 import com.rue.pomelo.kafka.PomeloClient;
-import org.apache.kafka.common.serialization.ByteArrayDeserializer;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.Properties;
 
 import static org.apache.kafka.clients.consumer.ConsumerConfig.*;
+import static org.apache.kafka.streams.StreamsConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.streams.StreamsConfig.*;
 
 @Service("pomelo")
 public class Pomelo {
 
     public static final Properties PROPS;
 
-    public static final String GROUP_ID = System.getenv("kafka.group.id");
+    public static final String KAFKA_TOPIC_PREFIX = "kafka.topic";
 
-    public static final String SERVERS = System.getenv("kafka.bootstrap.servers");
+    public static final String APPLICATION_ID = "pomelo-stream-client";
 
-    public static final String KAFKA_TOPIC = "kafka.topic";
-
-    private static final String KAFKA_TOPIC_PROP = System.getenv("kafka.topic");
+    public static final String STATE_STORE_CACHE_MAX_BYTES = "0";
 
     static {
 
         PROPS = new Properties();
-        PROPS.setProperty(BOOTSTRAP_SERVERS_CONFIG, SERVERS);
-        PROPS.setProperty(GROUP_ID_CONFIG, GROUP_ID);
+        PROPS.setProperty(BOOTSTRAP_SERVERS_CONFIG, System.getenv("kafka.bootstrap.servers"));
+        PROPS.setProperty(GROUP_ID_CONFIG, System.getenv("kafka.group.id"));
 
-        PROPS.setProperty(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        PROPS.setProperty(VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
+        PROPS.setProperty(APPLICATION_ID_CONFIG, APPLICATION_ID);
+        PROPS.setProperty(STATESTORE_CACHE_MAX_BYTES_CONFIG, STATE_STORE_CACHE_MAX_BYTES);
+        PROPS.setProperty(NUM_STREAM_THREADS_CONFIG, System.getenv("num.threads"));
 
         PROPS.setProperty(AUTO_OFFSET_RESET_CONFIG, "earliest");
         PROPS.setProperty(ENABLE_AUTO_COMMIT_CONFIG, "true");
         PROPS.setProperty(AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
 
-        PROPS.setProperty(KAFKA_TOPIC, KAFKA_TOPIC_PROP);
+        PROPS.setProperty(KAFKA_TOPIC_PREFIX, System.getenv("kafka.topic"));
 
     }
-
-    private PomeloClient pomeloClient;
 
     public Pomelo() { }
 
-    @Bean
-    public SimpleAsyncTaskExecutor taskExecutor() { return new SimpleAsyncTaskExecutor(); }
-
-    @Bean
-    public CommandLineRunner schedulingRunner(SimpleAsyncTaskExecutor executor) {
-
-        return args -> {
-
-            executor.execute(pomeloClient = new PomeloClient(PROPS));
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> pomeloClient.shutdown()));
-
-        };
-
-    }
+    @Bean(destroyMethod = "shutdown")
+    private PomeloClient getPomeloClient() { return new PomeloClient(PROPS); }
 
 }

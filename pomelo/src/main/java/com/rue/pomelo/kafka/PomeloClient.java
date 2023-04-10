@@ -1,87 +1,86 @@
 package com.rue.pomelo.kafka;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.errors.WakeupException;
+import com.google.protobuf.InvalidProtocolBufferException;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.KStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import protobuf.Machine;
+import protobuf.SensorValue;
 
-import java.time.Duration;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
-import static com.rue.pomelo.Pomelo.KAFKA_TOPIC;
+import static com.rue.pomelo.Pomelo.KAFKA_TOPIC_PREFIX;
+import static java.lang.Float.*;
 
-public class PomeloClient implements Runnable {
+public class PomeloClient {
 
-    private final AtomicBoolean closed = new AtomicBoolean(false);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PomeloClient.class);
 
-    private final Logger logger = LoggerFactory.getLogger(PomeloClient.class);
-
-    private final KafkaConsumer<String, byte[]> consumer;
+    private KafkaStreams streams;
 
     private final Properties properties;
 
     public PomeloClient(Properties properties) {
 
         this.properties = properties;
-        this.consumer = new KafkaConsumer<>(properties);
+        start();
 
     }
 
-    @Override
-    public void run() {
+    private void start() {
 
-        subscribe();
+        StreamsBuilder builder = new StreamsBuilder();
 
-        try {
+        String topicPrefix = properties.getProperty(KAFKA_TOPIC_PREFIX);
+        Pattern pattern = Pattern.compile(topicPrefix + ".*");
 
-            while (!closed.get()) {
+        KStream<String, Bytes> stream = builder.stream(pattern,
+                Consumed.with(Serdes.String(), Serdes.Bytes()));
 
-                ConsumerRecords<String, byte[]> records = consumer.poll(Duration.ofSeconds(10));
-                for (ConsumerRecord<String, byte[]> record : records) {
+        KStream<String, Machine> machineData = stream.mapValues(value -> {
 
-                    logger.info("Received machine data with: " +
-                                    "topic: [{}], " +
-                                    "with partition: [{}], " +
-                                    "at offset: [{}] " +
-                                    "key: [{}] " +
-                                    "value: [{}]",
-                            record.topic(),
-                            record.partition(),
-                            record.offset(),
-                            record.key(),
-//                            Machine.parseFrom(record.value()));
-                            record.value());
+            try { return Machine.parseFrom(value.get()); }
+            catch (InvalidProtocolBufferException e) { throw new RuntimeException(e); }
 
-                }
+        });
 
-            }
+        KStream<String, Machine> validateSensorValues = machineData.filter((key, value) ->
+                value.getSensorValuesList()
+                        .stream()
+                        .noneMatch(PomeloClient::outOfRange));
 
-        } catch (WakeupException e) {
+        validateSensorValues.foreach((key, value) ->
+                LOGGER.info("@DATA:" + key + ", " + value.toString()));
 
-            // Ignore exception if closing
-            if (!closed.get()) throw e;
+//        KStream<String, Bytes> outputData = validateSensorValues.mapValues(value -> Bytes.wrap(value.toByteArray()));
+//        outputData.to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Bytes()));
 
-        } finally { consumer.close(); }
-
-    }
-
-    private void subscribe() {
-
-        String kafkaTopic = properties.getProperty(KAFKA_TOPIC);
-        Pattern pattern = Pattern.compile(kafkaTopic + ".*");
-        consumer.subscribe(pattern);
+        Topology topology = builder.build();
+        streams = new KafkaStreams(topology, properties);
+        streams.start();
 
     }
 
     public void shutdown() {
 
-        logger.info("Closing consumer..");
-        closed.set(true);
-        consumer.wakeup();
+        LOGGER.info("Closing Stream Consumer...");
+        streams.close();
+
+    }
+
+    private static boolean outOfRange(SensorValue sensor) {
+
+        return sensor == null ||
+                isNaN(sensor.getMetrics()) ||
+                sensor.getMetrics() == MAX_VALUE ||
+                isInfinite(sensor.getMetrics());
 
     }
 

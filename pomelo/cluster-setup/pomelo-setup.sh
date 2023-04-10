@@ -1,5 +1,4 @@
 #!/bin/bash
-#set -o errexit
 
 # create registry container unless it already exists
 reg_name='citrus-registry'
@@ -49,7 +48,6 @@ cd ~/Repos/citrus/pomelo/cluster-setup/ || exit
 # TODO: We need the persistent .yaml in case of pod failure.
 kubectl apply -f kafka-ephemeral.yaml
 
-# TODO: Find what to wait for.
 echo "Waiting for Strimzi Entity Operator to complete its setup."
 running=true
 while [ "$running" = true ]; do
@@ -68,35 +66,8 @@ while [ "$running" = true ]; do
 
 done
 
-#kubectl apply -f pomelo-kafka-topic.yaml
-
 kubectl apply -f pomelo-secret.yaml
 
 kubectl apply -f pomelo-dplmt.yaml
 
 kubectl apply -f pomelo-service.yaml
-
-## TODO: No need. Delete them when the time is right.
-#kubectl apply -f pomelo-ingress-controller.yaml
-#
-#echo "Waiting for Nginx Ingress Controller to complete its setup."
-#running=true
-#while [ "$running" = true ]; do
-#
-#    sleep 5
-#
-#    complete=$(kubectl wait --namespace ingress-nginx \
-#                 --for=condition=ready pod \
-#                 --selector=app.kubernetes.io/component=controller \
-#                 --timeout=-1s 2> /dev/null)
-#
-#    if grep -q "condition met" <<< "$complete"; then
-#      running=false
-#      echo "Nginx Ingress Controller setup complete."
-#    fi
-#
-#done
-#
-#kubectl apply -f pomelo-allow-tcp.yaml
-#
-#kubectl apply -f pomelo-ingress.yaml
