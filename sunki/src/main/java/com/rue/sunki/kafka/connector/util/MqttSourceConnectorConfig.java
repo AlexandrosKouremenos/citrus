@@ -2,12 +2,13 @@ package com.rue.sunki.kafka.connector.util;
 
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
-import org.apache.kafka.common.config.ConfigDef.Importance;
 
 import java.util.Map;
-import java.util.UUID;
 
-import static org.apache.kafka.common.config.ConfigDef.Type;
+import static java.util.UUID.randomUUID;
+import static org.apache.kafka.clients.producer.ProducerConfig.*;
+import static org.apache.kafka.common.config.ConfigDef.Importance.*;
+import static org.apache.kafka.common.config.ConfigDef.Type.*;
 
 public class MqttSourceConnectorConfig extends AbstractConfig {
 
@@ -32,41 +33,33 @@ public class MqttSourceConnectorConfig extends AbstractConfig {
     public static final String KAFKA_TOPIC = "kafka.topic";
     public static final String KAFKA_TOPIC_DOC = "Kafka topic.";
 
+    private static final String ACKS_CONF_ENV = System.getenv("acks.conf");
+    public static final String ACKS_CONF = ACKS_CONF_ENV == null ? "all" : ACKS_CONF_ENV;
+    public static final String ACKS_DOC = "Acknowledgement";
+
+    private static final String BATCH_SIZE_ENV = System.getenv("batch.size");
+    public static final String BATCH_SIZE_CONF = BATCH_SIZE_ENV == null ? "16384" : BATCH_SIZE_ENV;
+    public static final String BATCH_SIZE_DOC = "Batch size";
+
+    private static final String LINGER_MS_ENV = System.getenv("linger.ms");
+    public static final Long LINGER_MS_CONF = LINGER_MS_ENV == null ? 0L : Long.parseLong(LINGER_MS_ENV);
+    public static final String LINGER_MS_CONF_DOC = "linger ms";
+
     public MqttSourceConnectorConfig(Map<?, ?> originals) { super(configDef(), originals); }
 
     public static ConfigDef configDef() {
 
         return new ConfigDef()
-                .define(MQTT_HOST,
-                        Type.STRING,
-                        Importance.HIGH,
-                        MQTT_HOST_DOC)
-                .define(MQTT_PORT,
-                        Type.INT,
-                        1883,
-                        Importance.HIGH,
-                        MQTT_PORT_DOC)
-                .define(MQTT_CLIENT_ID,
-                        Type.STRING,
-                        UUID.randomUUID().toString(),
-                        Importance.HIGH,
-                        MQTT_CLIENT_ID_DOC)
-                .define(MQTT_TOPIC_PREFIX,
-                        Type.STRING,
-                        Importance.HIGH,
-                        MQTT_TOPIC_DOC)
-                .define(KAFKA_TOPIC,
-                        Type.STRING,
-                        Importance.HIGH,
-                        KAFKA_TOPIC_DOC)
-                .define(MQTT_USERNAME,
-                        Type.STRING,
-                        Importance.MEDIUM,
-                        MQTT_USERNAME_DOC)
-                .define(MQTT_PASSWORD,
-                        Type.STRING,
-                        Importance.MEDIUM,
-                        MQTT_PASSWORD_DOC);
+                .define(MQTT_HOST, STRING, HIGH, MQTT_HOST_DOC)
+                .define(MQTT_PORT, INT, 1883, HIGH, MQTT_PORT_DOC)
+                .define(MQTT_CLIENT_ID, STRING, randomUUID().toString(), HIGH, MQTT_CLIENT_ID_DOC)
+                .define(MQTT_TOPIC_PREFIX, STRING, HIGH, MQTT_TOPIC_DOC)
+                .define(KAFKA_TOPIC, STRING, HIGH, KAFKA_TOPIC_DOC)
+                .define(MQTT_USERNAME, STRING, MEDIUM, MQTT_USERNAME_DOC)
+                .define(MQTT_PASSWORD, STRING, MEDIUM, MQTT_PASSWORD_DOC)
+                .define(ACKS_CONFIG, STRING, ACKS_CONF, LOW, ACKS_DOC)
+                .define(BATCH_SIZE_CONFIG, STRING, BATCH_SIZE_CONF, LOW, BATCH_SIZE_DOC)
+                .define(LINGER_MS_CONFIG, LONG, LINGER_MS_CONF, MEDIUM, LINGER_MS_CONF_DOC);
 
     }
 

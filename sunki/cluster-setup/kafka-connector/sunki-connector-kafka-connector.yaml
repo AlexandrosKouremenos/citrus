@@ -25,6 +25,9 @@ spec:
     kafka.topic: machine
     mqtt.topic.prefix: machine
     mqtt.port: 1883
+    acks.conf: 0
+    batch.size: 10000
+    linger.ms: 500
 #    TODO: CURRENTLY THIS DOES NOT WORK. To run, we need the literal String values.
 #    TODO: Support the following as described here https://strimzi.io/docs/operators/latest/configuring.html#type-ExternalConfigurationEnv-reference
     mqtt.host: "${file:/opt/kafka/external-configuration/mqtt-credentials/mqtt.host}"
