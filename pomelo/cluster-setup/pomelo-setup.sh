@@ -12,10 +12,14 @@ fi
 # create a cluster with the local registry enabled in containerd
 kind create cluster --config pomelo-cluster.yaml
 
+docker push localhost:${reg_port}/quay.io/strimzi/kafka:0.34.0-kafka-3.4.0
+
 docker push localhost:${reg_port}/pomelo:latest
 
 # Load application images in the cluster
 kind load docker-image localhost:${reg_port}/pomelo:latest --name pomelo-cluster
+
+kind load docker-image localhost:${reg_port}/quay.io/strimzi/kafka:0.34.0-kafka-3.4.0 --name pomelo-cluster
 
 # connect the registry to the cluster network if not already connected
 if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
@@ -71,3 +75,28 @@ kubectl apply -f pomelo-secret.yaml
 kubectl apply -f pomelo-dplmt.yaml
 
 kubectl apply -f pomelo-service.yaml
+#
+## TODO Delete later.
+#kubectl apply -f pomelo-ingress-controller.yaml
+#
+#echo "Waiting for Nginx Ingress Controller to complete its setup."
+#running=true
+#while [ "$running" = true ]; do
+#
+#    sleep 5
+#
+#    complete=$(kubectl wait --namespace ingress-nginx \
+#                 --for=condition=ready pod \
+#                 --selector=app.kubernetes.io/component=controller \
+#                 --timeout=-1s 2> /dev/null)
+#
+#    if grep -q "condition met" <<< "$complete"; then
+#      running=false
+#      echo "Nginx Ingress Controller setup complete."
+#    fi
+#
+#done
+#
+#kubectl apply -f pomelo-allow-tcp.yaml
+#
+#kubectl apply -f pomelo-ingress.yaml

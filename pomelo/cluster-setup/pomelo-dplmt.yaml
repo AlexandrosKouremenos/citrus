@@ -22,6 +22,14 @@ spec:
             - name: actuator
               containerPort: 8085
           env:
+            - name: fetch.max.bytes
+              value: '524288000'
+            - name: max.partition.fetch.bytes
+              value: '104857600'
+            - name: fetch.max.wait.ms
+              value: '500'
+            - name: topology.optimize
+              value: 'all'
             - name: kafka.bootstrap.servers
               valueFrom:
                 secretKeyRef:
@@ -41,6 +49,7 @@ spec:
                   key: kafka.topic
                   optional: false
             - name: num.threads
+#              value: '1'
               valueFrom:
                 secretKeyRef:
                   name: pomelo-secret

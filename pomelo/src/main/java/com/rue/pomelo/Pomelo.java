@@ -21,6 +21,17 @@ public class Pomelo {
 
     public static final String STATE_STORE_CACHE_MAX_BYTES = "0";
 
+    private static final String OPTIMIZATION_ENV = System.getenv("topology.optimize");
+
+    private static final String NUM_THREADS_ENV = System.getenv("num.threads");
+
+    private static final String FETCH_MAX_BYTES_ENV = System.getenv("fetch.max.bytes");
+
+    private static final String MAX_PARTITION_FETCH_BYTES_ENV =
+            System.getenv("max.partition.fetch.bytes");
+
+    private static final String FETCH_MAX_WAIT_MS_ENV = System.getenv("fetch.max.wait.ms");
+
     static {
 
         PROPS = new Properties();
@@ -29,11 +40,25 @@ public class Pomelo {
 
         PROPS.setProperty(APPLICATION_ID_CONFIG, APPLICATION_ID);
         PROPS.setProperty(STATESTORE_CACHE_MAX_BYTES_CONFIG, STATE_STORE_CACHE_MAX_BYTES);
-        PROPS.setProperty(NUM_STREAM_THREADS_CONFIG, System.getenv("num.threads"));
 
+        if (OPTIMIZATION_ENV != null)
+            PROPS.setProperty(TOPOLOGY_OPTIMIZATION_CONFIG, OPTIMIZATION_ENV);
+
+        if (NUM_THREADS_ENV != null) PROPS.setProperty(NUM_STREAM_THREADS_CONFIG, NUM_THREADS_ENV);
+
+        /* Consumer Configurations */
         PROPS.setProperty(AUTO_OFFSET_RESET_CONFIG, "earliest");
         PROPS.setProperty(ENABLE_AUTO_COMMIT_CONFIG, "true");
         PROPS.setProperty(AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+
+        if (FETCH_MAX_BYTES_ENV != null)
+            PROPS.setProperty(FETCH_MAX_BYTES_CONFIG, FETCH_MAX_BYTES_ENV);
+
+        if (MAX_PARTITION_FETCH_BYTES_ENV != null)
+            PROPS.setProperty(MAX_PARTITION_FETCH_BYTES_CONFIG, MAX_PARTITION_FETCH_BYTES_ENV);
+
+        if (FETCH_MAX_WAIT_MS_ENV != null)
+            PROPS.setProperty(FETCH_MAX_WAIT_MS_CONFIG, FETCH_MAX_WAIT_MS_ENV);
 
         PROPS.setProperty(KAFKA_TOPIC_PREFIX, System.getenv("kafka.topic"));
 
