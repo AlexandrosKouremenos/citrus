@@ -14,13 +14,13 @@ kind create cluster --config sunki-cluster.yaml
 
 docker push localhost:${reg_port}/sunki-mosquitto:latest
 
-# Load application images in the cluster
-kind load docker-image localhost:${reg_port}/sunki-mosquitto:latest --name sunki-cluster
-
 # connect the registry to the cluster network if not already connected
 if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
   docker network connect "kind" "${reg_name}"
 fi
+
+# Load application images in the cluster
+kind load docker-image localhost:${reg_port}/sunki-mosquitto:latest --name sunki-cluster
 
 cd ~/Utilities/strimzi-0.34.0/ || exit
 
@@ -99,7 +99,7 @@ docker push localhost:${reg_port}/sunki-connector:latest
 
 kind load docker-image localhost:${reg_port}/sunki-connector:latest --name sunki-cluster
 
-bootstrapServers=$(kubectl --context=kind-pomelo-cluster get kafka my-cluster -o=jsonpath='{.status.listeners[?(@.name=="external")].bootstrapServers}{"\n"}')
+bootstrapServers=$(kubectl --context=kind-pomelo-cluster get kafka pomelo-cluster -o=jsonpath='{.status.listeners[?(@.name=="external")].bootstrapServers}{"\n"}')
 
 echo "$bootstrapServers"
 

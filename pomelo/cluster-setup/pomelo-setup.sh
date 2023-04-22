@@ -12,19 +12,15 @@ fi
 # create a cluster with the local registry enabled in containerd
 kind create cluster --config pomelo-cluster.yaml
 
-docker push localhost:${reg_port}/quay.io/strimzi/kafka:0.34.0-kafka-3.4.0
-
 docker push localhost:${reg_port}/pomelo:latest
-
-# Load application images in the cluster
-kind load docker-image localhost:${reg_port}/pomelo:latest --name pomelo-cluster
-
-kind load docker-image localhost:${reg_port}/quay.io/strimzi/kafka:0.34.0-kafka-3.4.0 --name pomelo-cluster
 
 # connect the registry to the cluster network if not already connected
 if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
   docker network connect "kind" "${reg_name}"
 fi
+
+# Load application images in the cluster
+kind load docker-image localhost:${reg_port}/pomelo:latest --name pomelo-cluster
 
 cd ~/Utilities/strimzi-0.34.0/ || exit
 
@@ -50,7 +46,7 @@ kubectl create -f install/cluster-operator/ -n default
 cd ~/Repos/citrus/pomelo/cluster-setup/ || exit
 
 # TODO: We need the persistent .yaml in case of pod failure.
-kubectl apply -f kafka-ephemeral.yaml
+kubectl apply -f kafka-cluster/kafka-ephemeral.yaml
 
 echo "Waiting for Strimzi Entity Operator to complete its setup."
 running=true
@@ -60,7 +56,7 @@ while [ "$running" = true ]; do
 
     complete=$(kubectl wait --namespace default \
                 --for=condition=Available \
-                deployment/my-cluster-entity-operator \
+                deployment/pomelo-cluster-entity-operator \
                 --timeout=-1s 2> /dev/null)
 
     if grep -q "condition met" <<< "$complete"; then
@@ -70,33 +66,8 @@ while [ "$running" = true ]; do
 
 done
 
-kubectl apply -f pomelo-secret.yaml
+kubectl apply -f kafka-streams/pomelo-secret.yaml
 
-kubectl apply -f pomelo-dplmt.yaml
+kubectl apply -f kafka-streams/pomelo-dplmt.yaml
 
-kubectl apply -f pomelo-service.yaml
-#
-## TODO Delete later.
-#kubectl apply -f pomelo-ingress-controller.yaml
-#
-#echo "Waiting for Nginx Ingress Controller to complete its setup."
-#running=true
-#while [ "$running" = true ]; do
-#
-#    sleep 5
-#
-#    complete=$(kubectl wait --namespace ingress-nginx \
-#                 --for=condition=ready pod \
-#                 --selector=app.kubernetes.io/component=controller \
-#                 --timeout=-1s 2> /dev/null)
-#
-#    if grep -q "condition met" <<< "$complete"; then
-#      running=false
-#      echo "Nginx Ingress Controller setup complete."
-#    fi
-#
-#done
-#
-#kubectl apply -f pomelo-allow-tcp.yaml
-#
-#kubectl apply -f pomelo-ingress.yaml
+kubectl apply -f kafka-streams/pomelo-service.yaml
