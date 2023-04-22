@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import static com.rue.aurantium.data.Scheduler.TASK_SCHEDULER;
 import static com.rue.aurantium.mqtt.MachineTopic.getMachineTopic;
 import static java.lang.Long.parseLong;
+import static java.util.concurrent.CompletableFuture.delayedExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -72,18 +73,23 @@ abstract public class DataPublisher {
 
         LOG.info("Starting publishing to topic [{}].", getMachineTopic());
 
-        for (Path path : queue) {
+        BufferedReader reader = null;
+        while (!queue.isEmpty()) {
+
+            Path path = queue.pollLast();
 
             if (shuttingDown) {
+
                 LOG.info("Skipping other files.");
                 break;
+
             }
 
             LOG.info("Handling file [{}].", path);
 
             try {
 
-                BufferedReader reader = new BufferedReader(new FileReader(path.toFile()));
+                reader = new BufferedReader(new FileReader(path.toFile()));
 
                 EOF = false;
 
@@ -96,18 +102,35 @@ abstract public class DataPublisher {
                     if (future == null || future.isDone()) {
 
                         line = reader.readLine();
-                        if (line == null) EOF = true;
-                        else future = schedulePublish(line, machineDataParser);
+                        if (line == null) {
+
+                            /* Will loop the file forever. If you only want one iteration of the
+                            * file, keep only the EOF = true;
+                            */
+                            EOF = true;
+                            queue.add(path);
+
+                        } else future = schedulePublish(line, machineDataParser);
 
                     }
 
                 }
 
                 LOG.info("File [{}] handled.", path);
+
+            } catch (IOException e) { throw new RuntimeException(e); }
+
+        }
+
+        if (reader != null) {
+
+            try {
+
                 LOG.info("Closing reader.");
                 reader.close();
 
-            } catch (IOException e) { throw new RuntimeException(e); }
+            }
+            catch (IOException e) { throw new RuntimeException(e); }
 
         }
 
@@ -123,7 +146,7 @@ abstract public class DataPublisher {
         if (machine == null) return null;
 
         publish(machine);
-        Executor delayedExecutor = CompletableFuture.delayedExecutor(parseLong(PUBLISH_DELAY), SECONDS, executor);
+        Executor delayedExecutor = delayedExecutor(parseLong(PUBLISH_DELAY), SECONDS, executor);
 
         return CompletableFuture.runAsync(() -> {}, delayedExecutor); // Dummy Delay
 

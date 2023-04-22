@@ -7,4 +7,5 @@ public class MachineTopic {
     public MachineTopic() { }
 
     public static String getMachineTopic() { return MACHINE_TOPIC; }
+
 }

@@ -2,13 +2,17 @@ package com.rue.aurantium.mqtt;
 
 import com.hivemq.client.internal.mqtt.lifecycle.MqttClientAutoReconnectImpl;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.hivemq.client.mqtt.exceptions.ConnectionFailedException;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
+import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5DisconnectException;
+import com.hivemq.client.util.TypeSwitch;
 import com.rue.aurantium.data.DataPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import protobuf.Machine;
 
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 import static com.rue.aurantium.mqtt.MachineTopic.getMachineTopic;
@@ -24,6 +28,8 @@ public class AurantiumClient extends DataPublisher {
 
     private static final String PASSWORD = System.getenv("mqtt.password");
 
+    private static final int PORT = 1883;
+
     private final Mqtt5AsyncClient client;
 
     public AurantiumClient(String filePath) {
@@ -32,12 +38,22 @@ public class AurantiumClient extends DataPublisher {
 
         client = Mqtt5Client.builder()
                 .serverHost(HOST)
-                .serverPort(1883)
+                .serverPort(PORT)
                 .identifier(UUID.randomUUID().toString())
                 .automaticReconnect(MqttClientAutoReconnectImpl.DEFAULT)
                 .addConnectedListener(context -> LOGGER.info("Client received a ConnAck."))
-                .addDisconnectedListener(context ->
-                        LOGGER.warn("Client is not connected yet or will disconnect."))
+                .addDisconnectedListener(context -> {
+
+                    InetSocketAddress serverAddress = context.getClientConfig().getServerAddress();
+                    TypeSwitch.when(context.getCause())
+                            .is(ConnectionFailedException.class,
+                                    d -> LOGGER.error("Connection with: [{}] refused.",
+                                            serverAddress))
+                            .is(Mqtt5DisconnectException.class,
+                                    d -> LOGGER.info("Connection with: [{}] successfully closed.",
+                                            serverAddress));
+
+                })
                 .buildAsync();
 
         LOGGER.info("Client [{}] is built.", client);
@@ -85,7 +101,7 @@ public class AurantiumClient extends DataPublisher {
 
         client.disconnect().whenComplete((ack, throwable) -> {
 
-            if (throwable == null) LOGGER.info("Disconnecting client.");
+            if (throwable == null) LOGGER.info("Client disconnected.");
             else LOGGER.error("Shit.. ",  throwable);
 
         });
