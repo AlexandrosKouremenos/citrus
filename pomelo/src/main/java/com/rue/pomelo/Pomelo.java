@@ -67,6 +67,12 @@ public class Pomelo {
     public Pomelo() { }
 
     @Bean(destroyMethod = "shutdown")
-    private PomeloClient getPomeloClient() { return new PomeloClient(PROPS); }
+    private PomeloClient getPomeloClient() {
+
+        PomeloClient pomeloClient = new PomeloClient(PROPS);
+        pomeloClient.start();
+        return pomeloClient;
+
+    }
 
 }
