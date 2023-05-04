@@ -158,7 +158,13 @@ public class ProcessingDemo {
                         MeanSensorValue meanValue = null;
                         for (String sensorId : mean.keySet()) {
 
-                            meanValue = new MeanSensorValue(sensorId, mean.get(sensorId));
+                            SensorValue sensorValue = SensorValue.newBuilder()
+                                    .setId(sensorId)
+                                    .setMetrics(mean.get(sensorId))
+                                    .build();
+
+                            meanValue = new MeanSensorValue(sensorValue);
+                            LOGGER.info("Mean Value is [{}]", meanValue);
 
                         }
 
@@ -183,12 +189,12 @@ public class ProcessingDemo {
                                        HashMap<String, Float> meanValues,
                                        SensorValue sensor) {
 
-            if (meanValues.get(sensor.getId()) != null) {
-
-                LOGGER.info("SENSOR TYPE IS [{}]", sensor.getId());
-                LOGGER.info("MEAN VALUE TYPE IS [{}]", meanValues.get(sensor.getId()));
-
-            }
+//            if (meanValues.get(sensor.getId()) != null) {
+//
+//                LOGGER.info("SENSOR TYPE IS [{}]", sensor.getId());
+//                LOGGER.info("MEAN VALUE TYPE IS [{}]", meanValues.get(sensor.getId()));
+//
+//            }
 
             Float prevMeanValue = meanValues.get(sensor.getId());
             if (prevMeanValue != null)

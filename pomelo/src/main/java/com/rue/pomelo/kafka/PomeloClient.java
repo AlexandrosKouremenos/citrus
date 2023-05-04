@@ -1,23 +1,22 @@
 package com.rue.pomelo.kafka;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.utils.Bytes;
+import com.rue.pomelo.kafka.process.MachineProcessor;
+import com.rue.pomelo.kafka.process.MeanValueProcessorSupplier;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.processor.RecordContext;
+import org.apache.kafka.streams.processor.TopicNameExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import protobuf.Machine;
-import protobuf.SensorValue;
 
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 import static com.rue.pomelo.Pomelo.KAFKA_TOPIC_PREFIX;
-import static java.lang.Float.*;
+import static org.apache.kafka.common.serialization.Serdes.Bytes;
+import static org.apache.kafka.common.serialization.Serdes.String;
 
 public class PomeloClient {
 
@@ -27,42 +26,36 @@ public class PomeloClient {
 
     private final Properties properties;
 
-    public PomeloClient(Properties properties) {
+    public PomeloClient(Properties properties) { this.properties = properties; }
 
-        this.properties = properties;
-        start();
+    public void start() {
 
-    }
-
-    private void start() {
-
-        StreamsBuilder builder = new StreamsBuilder();
+        Topology topology = new Topology();
 
         String topicPrefix = properties.getProperty(KAFKA_TOPIC_PREFIX);
         Pattern pattern = Pattern.compile(topicPrefix + ".*");
 
-        KStream<String, Bytes> stream = builder.stream(pattern,
-                Consumed.with(Serdes.String(), Serdes.Bytes()));
+        topology.addSource("Source",
+                String().deserializer(),
+                Bytes().deserializer(),
+                pattern);
 
-        KStream<String, Machine> machineData = stream.mapValues(value -> {
+        topology.addProcessor("Machine-Processor",
+                MachineProcessor::new,
+                "Source");
 
-            try { return Machine.parseFrom(value.get()); }
-            catch (InvalidProtocolBufferException e) { throw new RuntimeException(e); }
+        topology.addProcessor("Mean-Value-Processor",
+                new MeanValueProcessorSupplier(),
+                "Machine-Processor");
 
-        });
+        // TODO: Add another sink for sensor values only.
+        topology.addSink("Machine-Sink",
+//                "out.0",
+                new MachineTopicExtractor<String, Machine>(),
+                String().serializer(),
+                MachineSerializer.MACHINE_SERIALIZER,
+                "Machine-Processor");
 
-        KStream<String, Machine> validateSensorValues = machineData.filter((key, value) ->
-                value.getSensorValuesList()
-                        .stream()
-                        .noneMatch(PomeloClient::outOfRange));
-
-        validateSensorValues.foreach((key, value) ->
-                LOGGER.info("@DATA:" + key + ", " + value.toString()));
-
-//        KStream<String, Bytes> outputData = validateSensorValues.mapValues(value -> Bytes.wrap(value.toByteArray()));
-//        outputData.to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Bytes()));
-
-        Topology topology = builder.build();
         streams = new KafkaStreams(topology, properties);
         streams.start();
 
@@ -75,12 +68,26 @@ public class PomeloClient {
 
     }
 
-    private static boolean outOfRange(SensorValue sensor) {
+    private static class MachineTopicExtractor<K, V> implements TopicNameExtractor<K, V> {
 
-        return sensor == null ||
-                isNaN(sensor.getMetrics()) ||
-                sensor.getMetrics() == MAX_VALUE ||
-                isInfinite(sensor.getMetrics());
+        @Override
+        public String extract(K key, V value, RecordContext recordContext) {
+
+            if (value instanceof Machine) return onMachine((Machine) value);
+            return recordContext.topic();
+
+        }
+
+        private String onMachine(Machine machine) { return machine.getId(); }
+
+    }
+
+    public static class MachineSerializer implements Serializer<Machine> {
+
+        private static final MachineSerializer MACHINE_SERIALIZER = new MachineSerializer();
+
+        @Override
+        public byte[] serialize(String topic, Machine data) { return data.toByteArray(); }
 
     }
 

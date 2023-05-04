@@ -30,7 +30,7 @@ public class SensorListSerde implements CustomSerde {
 
             } catch (JsonProcessingException e) {
 
-                LOGGER.error("Failed to serialize HashMap due to", e);
+                LOGGER.error("Failed to serialize List due to", e);
                 throw new RuntimeException(e);
 
             }

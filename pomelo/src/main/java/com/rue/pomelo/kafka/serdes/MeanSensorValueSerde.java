@@ -6,6 +6,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import protobuf.SensorValue;
 
 import java.io.*;
 
@@ -24,7 +25,7 @@ public class MeanSensorValueSerde implements CustomSerde {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     DataOutputStream dataOut = new DataOutputStream(outputStream)
             ) {
-                return MAPPER.writeValueAsBytes(data);
+                return data.sensorValue().toByteArray();
 
 //                dataOut.writeUTF(data.id());
 //                dataOut.writeFloat(data.meanValue());
@@ -56,7 +57,7 @@ public class MeanSensorValueSerde implements CustomSerde {
                     DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(data))
             ) {
 
-                return MAPPER.readValue(data, MeanSensorValue.class);
+                return new MeanSensorValue(SensorValue.parseFrom(data));
 
 //                String id = inputStream.readUTF();
 //                float meanValue = inputStream.readFloat();
@@ -78,6 +79,6 @@ public class MeanSensorValueSerde implements CustomSerde {
         return Serdes.serdeFrom(new MeanSensorSerializer(), new MeanSensorDeserializer());
     }
 
-    public record MeanSensorValue(String id, float meanValue) { }
+    public record MeanSensorValue(SensorValue sensorValue) { }
 
 }
