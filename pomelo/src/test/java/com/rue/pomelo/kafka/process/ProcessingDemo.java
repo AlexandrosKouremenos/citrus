@@ -2,12 +2,11 @@ package com.rue.pomelo.kafka.process;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.rue.pomelo.kafka.serdes.HashMapSerde;
-import com.rue.pomelo.kafka.serdes.MeanSensorValueSerde;
-import com.rue.pomelo.kafka.serdes.MeanSensorValueSerde.MeanSensorValue;
-import com.rue.pomelo.kafka.serdes.SensorListSerde;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
@@ -21,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import protobuf.Machine;
 import protobuf.SensorValue;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -35,6 +35,7 @@ import static java.time.Duration.ofSeconds;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
 import static org.apache.kafka.streams.StreamsConfig.NUM_STREAM_THREADS_CONFIG;
 
+// TODO: Update with the new computation method or Delete.
 public class ProcessingDemo {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessingDemo.class);
@@ -126,7 +127,7 @@ public class ProcessingDemo {
 
             AtomicLong count = new AtomicLong(0);
             KStream<Windowed<String>, HashMap<String, Float>> meanSensorValues = sensorStream
-                    .groupByKey(Grouped.with(Serdes.String(), SensorListSerde.SensorList()))
+                    .groupByKey(Grouped.with(Serdes.String(), SerdeSenorList.SensorList()))
                     .windowedBy(getSlidingWindows(5, 500))
                     .emitStrategy(EmitStrategy.onWindowClose())
                     .aggregate(HashMap::new,
@@ -152,10 +153,10 @@ public class ProcessingDemo {
 
             LOGGER.info("Windowed stream with mean values computed");
 
-            KStream<String, MeanSensorValue> outputSensors = meanSensorValues
+            KStream<String, MeanSensorValueSerde.MeanSensorValue> outputSensors = meanSensorValues
                     .mapValues(mean -> {
 
-                        MeanSensorValue meanValue = null;
+                        MeanSensorValueSerde.MeanSensorValue meanValue = null;
                         for (String sensorId : mean.keySet()) {
 
                             SensorValue sensorValue = SensorValue.newBuilder()
@@ -163,7 +164,7 @@ public class ProcessingDemo {
                                     .setMetrics(mean.get(sensorId))
                                     .build();
 
-                            meanValue = new MeanSensorValue(sensorValue);
+                            meanValue = new MeanSensorValueSerde.MeanSensorValue(sensorValue);
                             LOGGER.info("Mean Value is [{}]", meanValue);
 
                         }
@@ -174,7 +175,7 @@ public class ProcessingDemo {
 
             LOGGER.info("Stream with mean values built.");
 
-            Serde<MeanSensorValue> meanSensorValueSerde = MeanSensorValueSerde.MeanSensorValue();
+            Serde<MeanSensorValueSerde.MeanSensorValue> meanSensorValueSerde = MeanSensorValueSerde.MeanSensorValue();
             outputSensors.to(OUTPUT_TOPIC, Produced.with(Serdes.String(), meanSensorValueSerde));
 
             // Create the Kafka Streams application and start it
@@ -188,13 +189,6 @@ public class ProcessingDemo {
         private float computeMeanValue(Long count,
                                        HashMap<String, Float> meanValues,
                                        SensorValue sensor) {
-
-//            if (meanValues.get(sensor.getId()) != null) {
-//
-//                LOGGER.info("SENSOR TYPE IS [{}]", sensor.getId());
-//                LOGGER.info("MEAN VALUE TYPE IS [{}]", meanValues.get(sensor.getId()));
-//
-//            }
 
             Float prevMeanValue = meanValues.get(sensor.getId());
             if (prevMeanValue != null)
@@ -224,6 +218,96 @@ public class ProcessingDemo {
             return (value - min) / (max - min);
 
         }
+
+    }
+
+    public static final class SerdeSenorList {
+
+        public static class SensorListSerializer implements Serializer<List<SensorValue>> {
+
+            @Override
+            public byte[] serialize(String topic, List<SensorValue> data) {
+
+                if (data == null) return null;
+
+                return Machine.newBuilder()
+                        .addAllSensorValues(data)
+                        .setId("dummy-serializer")
+                        .build()
+                        .toByteArray();
+
+            }
+
+        }
+
+        public static class SensorListDeserializer implements Deserializer<List<SensorValue>> {
+
+            private static final Logger LOGGER = LoggerFactory.getLogger(SensorListDeserializer.class);
+
+            @Override
+            public List<SensorValue> deserialize(String topic, byte[] data) {
+
+                if (data == null) return null;
+
+                try { return Machine.parseFrom(data).getSensorValuesList(); }
+                catch (IOException e) {
+
+                    LOGGER.error("Failed to serialize HashMap due to", e);
+                    throw new RuntimeException(e);
+
+                }
+
+            }
+        }
+
+        public static Serde<List<SensorValue>> SensorList() {
+            return Serdes.serdeFrom(new SensorListSerializer(), new SensorListDeserializer());
+        }
+
+    }
+
+    public static class MeanSensorValueSerde {
+
+        private static class MeanSensorSerializer implements Serializer<MeanSensorValue> {
+
+            @Override
+            public byte[] serialize(String topic, MeanSensorValueSerde.MeanSensorValue data) {
+
+                if (data == null) return null;
+
+                return data.sensorValue().toByteArray();
+
+            }
+
+        }
+
+
+        public static class MeanSensorDeserializer implements Deserializer<MeanSensorValue> {
+
+            private static final Logger LOGGER = LoggerFactory.getLogger(MeanSensorDeserializer.class);
+
+            @Override
+            public MeanSensorValue deserialize(String topic, byte[] data) {
+
+                if (data == null) return null;
+
+                try { return new MeanSensorValue(SensorValue.parseFrom(data)); }
+                catch (IOException e) {
+
+                    LOGGER.error("Failed to deserialize MeanSensorValue due to", e);
+                    throw new RuntimeException(e);
+
+                }
+
+            }
+
+        }
+
+        public static Serde<MeanSensorValue> MeanSensorValue() {
+            return Serdes.serdeFrom(new MeanSensorSerializer(), new MeanSensorDeserializer());
+        }
+
+        public record MeanSensorValue(SensorValue sensorValue) { }
 
     }
 

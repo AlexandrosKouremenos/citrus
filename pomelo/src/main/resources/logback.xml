@@ -7,6 +7,9 @@
 
     <logger name="org.apache.kafka.streams.processor.internals.StreamThread" level="ERROR" />
 
+<!--    <include resource="org/springframework/boot/logging/logback/base.xml" />-->
+<!--    <logger name="org.apache.kafka.streams.processor.internals.StreamThread" level="WARN"/>-->
+
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />
     </root>

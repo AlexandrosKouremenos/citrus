@@ -2,7 +2,6 @@ package com.rue.pomelo.kafka;
 
 import com.rue.pomelo.kafka.process.MachineProcessor;
 import com.rue.pomelo.kafka.process.MeanValueProcessorSupplier;
-import com.rue.pomelo.kafka.serdes.SensorListSerde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
@@ -11,6 +10,7 @@ import org.apache.kafka.streams.processor.TopicNameExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import protobuf.Machine;
+import protobuf.SensorValue;
 
 import java.util.List;
 import java.util.Properties;
@@ -59,7 +59,7 @@ public class PomeloClient {
         topology.addSink("Sensor-Mean-Value-Sink",
                 new MachineTopicExtractor<>(), // publishing to <machine.id>-sensor-list
                 String().serializer(),
-                SensorListSerde.SensorListSerializer.SENSOR_LIST_SERIALIZER,
+                SensorListSerializer.SENSORS_SERIALIZER,
                 "Mean-Value-Processor");
 
         streams = new KafkaStreams(topology, properties);
@@ -89,7 +89,9 @@ public class PomeloClient {
 
         }
 
-        private String onList(K key) { return key + "-sensor-list"; }
+        private String onList(K key) {
+            return ((String) key).replace("/", ".") + "-sensor-list";
+        }
 
         private String onMachine(Machine machine) { return machine.getId(); }
 
@@ -101,6 +103,24 @@ public class PomeloClient {
 
         @Override
         public byte[] serialize(String topic, Machine data) { return data.toByteArray(); }
+
+    }
+
+    public static class SensorListSerializer implements Serializer<List<SensorValue>> {
+
+        private static final SensorListSerializer SENSORS_SERIALIZER = new SensorListSerializer();
+
+        @Override
+        public byte[] serialize(String topic, List<SensorValue> data) {
+
+            if (data == null) return null;
+
+            return Machine.newBuilder()
+                    .addAllSensorValues(data)
+                    .setId("sensor-list-serializer")
+                    .build()
+                    .toByteArray();
+        }
 
     }
 
