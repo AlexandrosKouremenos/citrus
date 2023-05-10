@@ -2,6 +2,7 @@ package com.rue.pomelo.kafka;
 
 import com.rue.pomelo.kafka.process.MachineProcessor;
 import com.rue.pomelo.kafka.process.MeanValueProcessorSupplier;
+import com.rue.pomelo.kafka.serdes.SensorListSerde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import protobuf.Machine;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -48,13 +50,17 @@ public class PomeloClient {
                 new MeanValueProcessorSupplier(),
                 "Machine-Processor");
 
-        // TODO: Add another sink for sensor values only.
         topology.addSink("Machine-Sink",
-//                "out.0",
-                new MachineTopicExtractor<String, Machine>(),
+                new MachineTopicExtractor<>(),
                 String().serializer(),
                 MachineSerializer.MACHINE_SERIALIZER,
                 "Machine-Processor");
+
+        topology.addSink("Sensor-Mean-Value-Sink",
+                new MachineTopicExtractor<>(), // publishing to <machine.id>-sensor-list
+                String().serializer(),
+                SensorListSerde.SensorListSerializer.SENSOR_LIST_SERIALIZER,
+                "Mean-Value-Processor");
 
         streams = new KafkaStreams(topology, properties);
         streams.start();
@@ -63,8 +69,12 @@ public class PomeloClient {
 
     public void shutdown() {
 
-        LOGGER.info("Closing Stream Consumer...");
-        streams.close();
+        if (streams != null) {
+
+            LOGGER.info("Closing Stream Consumer...");
+            streams.close();
+
+        }
 
     }
 
@@ -74,9 +84,12 @@ public class PomeloClient {
         public String extract(K key, V value, RecordContext recordContext) {
 
             if (value instanceof Machine) return onMachine((Machine) value);
+            else if (value instanceof List<?>) return onList(key);
             return recordContext.topic();
 
         }
+
+        private String onList(K key) { return key + "-sensor-list"; }
 
         private String onMachine(Machine machine) { return machine.getId(); }
 

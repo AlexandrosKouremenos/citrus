@@ -8,6 +8,7 @@ import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Record;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.WindowStore;
+import org.apache.kafka.streams.state.WindowStoreIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import protobuf.Machine;
@@ -18,18 +19,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 public class MeanValueProcessor implements Processor<String, Machine, String, List<SensorValue>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MeanValueProcessor.class);
 
-    private ProcessorContext<String, List<SensorValue>> context;
-
+    /**
+     * Stores the mean value per sensor type for each machine.
+     * */
     private WindowStore<String, HashMap<String, Float>> windowStore;
 
-    private final AtomicLong counter = new AtomicLong(0);
+    /**
+     * Stores the number of values in a window for each machine.
+     * */
+    private final Map<String, Long> windowCounter = new HashMap<>();
 
     private final String stateStoreName;
 
@@ -45,7 +48,6 @@ public class MeanValueProcessor implements Processor<String, Machine, String, Li
     @Override
     public void init(ProcessorContext<String, List<SensorValue>> context) {
 
-        this.context = context;
         context.schedule(Duration.ofMillis(windowSize),
                 PunctuationType.STREAM_TIME,
                 timestamp -> {
@@ -60,6 +62,8 @@ public class MeanValueProcessor implements Processor<String, Machine, String, Li
                             List<SensorValue> outputValues = new ArrayList<>();
                             for (Map.Entry<String, Float> val : entry.value.entrySet())
                                 outputValues.add(newSensorValue(val.getKey(), val.getValue()));
+
+                            windowCounter.put(entry.key.key(), (long) entry.value.size());
 
                             LOGGER.info("Forwarding Mean Values records.");
                             context.forward(new Record<>(entry.key.key(), outputValues, timestamp));
@@ -76,6 +80,29 @@ public class MeanValueProcessor implements Processor<String, Machine, String, Li
     }
 
     @Override
+    public void close() {
+
+        Processor.super.close();
+        windowCounter.clear();
+
+    }
+
+    private static String listToString(List<SensorValue> sensorValues) {
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Sensors: " + "\n\t");
+        for (SensorValue sensor : sensorValues) {
+
+            builder.append("Type: ").append(sensor.getId())
+                    .append(", Metric: ").append(sensor.getMetrics())
+                    .append("\n\t");
+
+        }
+        return builder.toString();
+
+    }
+
+    @Override
     public void process(Record<String, Machine> record) {
 
         List<SensorValue> incoming = record.value().getSensorValuesList();
@@ -83,8 +110,8 @@ public class MeanValueProcessor implements Processor<String, Machine, String, Li
         long now = record.timestamp();
         long windowStart = now - windowSize;
 
-        try (KeyValueIterator<Windowed<String>, HashMap<String, Float>> iterator =
-                     windowStore.all()) {
+        try (WindowStoreIterator<HashMap<String, Float>> iterator =
+                     windowStore.fetch(record.key(), windowStart, now)) {
 
 //            KeyValueIterator<Windowed<String>, HashMap<String, Float>> it = windowStore.all();
 //
@@ -101,45 +128,50 @@ public class MeanValueProcessor implements Processor<String, Machine, String, Li
 //            }
 //            it.close();
 
+            HashMap<String, Float> newEntry = new HashMap<>();
             if (!iterator.hasNext()) {
 
                 LOGGER.info("Writing first entry in state store for key [{}]", record.key());
 
-                HashMap<String, Float> initEntry = incoming.stream()
-                        .collect(Collectors.toMap(SensorValue::getId,
-                                SensorValue::getMetrics,
-                                (a, b) -> b,
-                                HashMap::new));
-
-                windowStore.put(record.key(), initEntry, windowStart);
-                counter.incrementAndGet();
-                return;
-
-            }
-
-            LOGGER.info("Found previous entries in state store.");
-            HashMap<String, Float> newEntry = new HashMap<>();
-            while (iterator.hasNext()) {
-
-                HashMap<String, Float> inWindowValues = iterator.next().value;
-
                 for (SensorValue newValue : incoming) {
 
-                    String id = newValue.getId();
-                    newEntry.put(id, computeMean(inWindowValues.get(id), newValue.getMetrics()));
+                    if (!newValue.getId().equals("0"))
+                        newEntry.put(newValue.getId(), newValue.getMetrics());
+
+                }
+
+            } else {
+
+                LOGGER.info("Found previous entries in state store.");
+                while (iterator.hasNext()) {
+
+                    HashMap<String, Float> prevValues = iterator.next().value;
+
+                    for (SensorValue newValue : incoming) {
+
+                        String id = newValue.getId();
+                        if (!id.equals("0")) {
+
+                            long windowedValuesCount = windowCounter.get(record.key());
+                            float mean = computeMean(prevValues.get(id), newValue.getMetrics(), windowedValuesCount);
+                            newEntry.put(id, mean);
+
+                        }
+
+                    }
 
                 }
 
             }
 
-            windowStore.put(record.key(), newEntry, windowStart);
+            windowStore.put(record.key(), newEntry, now);
 
         } catch (Exception e) { LOGGER.error("Exception while processing.", e); }
 
     }
 
-    private float computeMean(float prevValue, float newValue) {
-        return (prevValue + newValue) / counter.incrementAndGet();
+    private static float computeMean(float prevValue, float newValue, long counter) {
+        return (prevValue + newValue) / counter;
     }
 
     private static SensorValue newSensorValue(String id, Float metrics) {
