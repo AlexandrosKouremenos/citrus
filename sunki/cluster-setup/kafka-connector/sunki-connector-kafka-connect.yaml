@@ -9,7 +9,7 @@ metadata:
     strimzi.io/use-connector-resources: "true"
 spec:
   version: 3.4.0
-  replicas: 3
+  replicas: 2
   bootstrapServers: {{kafka-external-bootstrap}}
   image: localhost:5001/sunki-connector:latest
   config:

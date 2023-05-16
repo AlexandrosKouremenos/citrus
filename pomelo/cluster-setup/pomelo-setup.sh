@@ -71,3 +71,5 @@ kubectl apply -f kafka-streams/pomelo-secret.yaml
 kubectl apply -f kafka-streams/pomelo-dplmt.yaml
 
 kubectl apply -f kafka-streams/pomelo-service.yaml
+
+kubectl apply -f kafka-streams/pomelo-hpa.yaml

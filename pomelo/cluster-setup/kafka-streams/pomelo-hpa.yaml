@@ -1,0 +1,29 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: pomelo-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pomelo
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: External
+      external:
+        metric:
+          name: kafka_lag
+          selector:
+#            TODO: Support all topics starting with machine.
+            matchExpressions:
+              - key: topic
+                operator: In
+                values:
+                  - machine.0
+                  - machine.2
+                  - machine.3
+                  - machine.4
+        target:
+          type: AverageValue
+          averageValue: "15"
