@@ -1,7 +1,6 @@
 package com.rue.pomelo.kafka;
 
 import com.rue.pomelo.kafka.process.MachineProcessor;
-import com.rue.pomelo.kafka.process.MeanValueProcessorSupplier;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
@@ -46,9 +45,9 @@ public class PomeloClient {
                 MachineProcessor::new,
                 "Source");
 
-        topology.addProcessor("Mean-Value-Processor",
-                new MeanValueProcessorSupplier(),
-                "Machine-Processor");
+//        topology.addProcessor("Mean-Value-Processor",
+//                new MeanValueProcessorSupplier(),
+//                "Machine-Processor");
 
         topology.addSink("Machine-Sink",
                 new MachineTopicExtractor<>(),
@@ -56,11 +55,11 @@ public class PomeloClient {
                 MachineSerializer.MACHINE_SERIALIZER,
                 "Machine-Processor");
 
-        topology.addSink("Sensor-Mean-Value-Sink",
-                new MachineTopicExtractor<>(), // publishing to <machine.id>-sensor-list
-                String().serializer(),
-                SensorListSerializer.SENSORS_SERIALIZER,
-                "Mean-Value-Processor");
+//        topology.addSink("Sensor-Mean-Value-Sink",
+//                new MachineTopicExtractor<>(), // publishing to <machine.id>-sensor-list
+//                String().serializer(),
+//                SensorListSerializer.SENSORS_SERIALIZER,
+//                "Mean-Value-Processor");
 
         streams = new KafkaStreams(topology, properties);
         streams.start();

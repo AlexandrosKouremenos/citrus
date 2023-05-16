@@ -22,6 +22,8 @@ fi
 # Load application images in the cluster
 kind load docker-image localhost:${reg_port}/sunki-mosquitto:latest --name sunki-cluster
 
+kubectl apply -f metrics-api-server.yaml
+
 cd ~/Utilities/strimzi-0.34.0/ || exit
 
 sed -i 's/namespace: .*/namespace: default/' install/cluster-operator/*RoleBinding*.yaml
@@ -110,3 +112,5 @@ kubectl apply -f kafka-connector/temp.yaml
 rm kafka-connector/temp.yaml
 
 kubectl apply -f kafka-connector/sunki-connector-kafka-connector.yaml
+
+#kubectl apply -f sunki-hpa.yaml

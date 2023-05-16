@@ -35,7 +35,12 @@ public class MachineProcessor implements Processor<String, Bytes, String, Machin
     public void process(Record<String, Bytes> record) {
 
         Machine machine;
-        try { machine = Machine.parseFrom(record.value().get()); }
+        try {
+
+            machine = Machine.parseFrom(record.value().get());
+            LOGGER.info("Successfully parsed incoming machine data for [{}].", machine.getId());
+
+        }
         catch (InvalidProtocolBufferException e) {
 
             LOGGER.error("Error while parsing machine.", e);

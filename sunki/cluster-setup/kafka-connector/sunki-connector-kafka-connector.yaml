@@ -14,7 +14,7 @@ metadata:
     strimzi.io/cluster: sunki-cluster
 spec:
   class: com.rue.sunki.kafka.connector.MqttSourceConnector
-  tasksMax: 3
+  tasksMax: 1
   autoRestart:
     enabled: true
   config:
