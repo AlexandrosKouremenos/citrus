@@ -10,22 +10,13 @@ spec:
   minReplicas: 1
   maxReplicas: 5
   metrics:
-    - type: Resource
-      resource:
-        name: cpu
+    - type: External
+      external:
+        metric:
+          name: kafka_lag
+          selector:
+            matchLabels:
+              topic: machine.0
         target:
-          type: Utilization
-          averageUtilization: 50
-#    - type: Resource
-#      resource:
-#        name: memory
-#        target:
-#          type: Utilization
-#          averageUtilization: 100
-#    - type: Pods
-#      pods:
-#        metric:
-#          name: packets-per-second
-#        target:
-#          type: AverageValue
-#          averageValue: "100"
+          type: AverageValue
+          averageValue: "15"

@@ -14,19 +14,13 @@ kind create cluster --config pomelo-cluster.yaml
 
 docker push localhost:${reg_port}/pomelo:latest
 
-#docker push localhost:${reg_port}/quay.io/strimzi/kafka:0.34.0-kafka-3.4.0
-
 # connect the registry to the cluster network if not already connected
 if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
   docker network connect "kind" "${reg_name}"
 fi
 
-#kind load docker-image localhost:${reg_port}/quay.io/strimzi/kafka:0.34.0-kafka-3.4.0 --name pomelo-cluster
-
 # Load application images in the cluster
 kind load docker-image localhost:${reg_port}/pomelo:latest --name pomelo-cluster
-
-kubectl apply -f metrics-api-server.yaml
 
 cd ~/Utilities/strimzi-0.34.0/ || exit
 
@@ -78,4 +72,4 @@ kubectl apply -f kafka-streams/pomelo-dplmt.yaml
 
 kubectl apply -f kafka-streams/pomelo-service.yaml
 
-#kubectl apply -f kafka-streams/pomelo-hpa.yaml
+kubectl apply -f kafka-streams/pomelo-hpa.yaml
