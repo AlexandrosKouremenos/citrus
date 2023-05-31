@@ -15,8 +15,15 @@ spec:
         metric:
           name: kafka_lag
           selector:
-            matchLabels:
-              topic: machine.0
+#            TODO: Support all topics starting with machine.
+            matchExpressions:
+              - key: topic
+                operator: In
+                values:
+                  - machine.0
+                  - machine.2
+                  - machine.3
+                  - machine.4
         target:
           type: AverageValue
           averageValue: "15"

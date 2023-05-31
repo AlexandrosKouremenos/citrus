@@ -4,15 +4,16 @@ metadata:
   name: additional-scrape-configs
 type: Opaque
 stringData:
+#  TODO: Delete them
+#  - job_name: 'kafka-lag-job'
+#    metrics_path: '/api/v1/metrics'
+#    scheme: http
+#    scrape_interval: 5s
+#    static_configs:
+#      - targets: [ 'http://prometheus-operated.default.svc:9090' ]
+#        labels:
+#          namespace: 'default'
   prometheus-additional.yaml: |
-    - job_name: 'kafka-lag-job'
-      metrics_path: '/api/v1/metrics'
-      scheme: http
-      scrape_interval: 5s
-      static_configs:
-        - targets: ['http://prometheus-operated.default.svc:9090'] 
-          labels:
-            namespace: 'default'
     - job_name: kubernetes-cadvisor
       honor_labels: true
       scrape_interval: 10s
