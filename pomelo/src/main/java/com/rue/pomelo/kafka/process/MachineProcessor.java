@@ -15,6 +15,9 @@ import java.util.stream.Stream;
 
 import static java.lang.Float.*;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class MachineProcessor implements Processor<String, Bytes, String, Machine> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MachineProcessor.class);

@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class HashMapSerde implements CustomSerde {
 
     private static class HashMapSerializer implements Serializer<HashMap<String, Float>> {

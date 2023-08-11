@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class MeanValueProcessor implements Processor<String, Machine, String, List<SensorValue>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MeanValueProcessor.class);

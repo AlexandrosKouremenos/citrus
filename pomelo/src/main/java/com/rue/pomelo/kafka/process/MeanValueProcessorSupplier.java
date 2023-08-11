@@ -17,6 +17,9 @@ import java.util.Set;
 import static com.rue.pomelo.kafka.serdes.HashMapSerde.HashMap;
 import static org.apache.kafka.common.serialization.Serdes.String;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class MeanValueProcessorSupplier implements ProcessorSupplier<String, Machine, String, List<SensorValue>> {
 
     private static final String MEAN_VALUE_STORE = "Mean-Value-Store";

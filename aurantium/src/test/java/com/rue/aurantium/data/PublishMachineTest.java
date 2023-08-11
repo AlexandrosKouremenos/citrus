@@ -11,6 +11,9 @@ import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class PublishMachineTest {
 
     private static final String HOST = System.getenv("mqtt.host");

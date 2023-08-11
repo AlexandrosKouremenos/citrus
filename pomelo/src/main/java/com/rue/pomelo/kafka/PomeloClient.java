@@ -19,6 +19,9 @@ import static com.rue.pomelo.Pomelo.KAFKA_TOPIC_PREFIX;
 import static org.apache.kafka.common.serialization.Serdes.Bytes;
 import static org.apache.kafka.common.serialization.Serdes.String;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class PomeloClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PomeloClient.class);

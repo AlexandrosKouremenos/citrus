@@ -21,6 +21,9 @@ import java.util.concurrent.ExecutionException;
 
 import static java.util.Collections.singletonMap;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class ProducerDemo {
 
     public static final String KAFKA_TOPIC = "machine.0";

@@ -15,6 +15,9 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class FileSourceTaskTest {
 
     static Map<String, String> props = new HashMap<>();

@@ -8,6 +8,9 @@ import java.util.Scanner;
 
 import static com.rue.sunki.kafka.connector.util.MqttSourceConnectorConfig.*;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class MqttSourceTaskTest {
 
     private static final Map<String, String> props = new HashMap<>();

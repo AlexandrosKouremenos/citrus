@@ -26,6 +26,7 @@ import static java.util.concurrent.CompletableFuture.delayedExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
+ * @author Alex Kouremenos
  * Takes a folder as an input. Read its files line by line and publish them with 1 sec delay.
  * Simulates the data produced from one building.
  * */

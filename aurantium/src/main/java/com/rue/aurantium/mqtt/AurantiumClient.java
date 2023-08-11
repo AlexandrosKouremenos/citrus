@@ -18,6 +18,9 @@ import java.util.UUID;
 import static com.rue.aurantium.mqtt.MachineTopic.getMachineTopic;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class AurantiumClient extends DataPublisher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AurantiumClient.class);

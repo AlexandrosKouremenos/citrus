@@ -10,6 +10,9 @@ import java.util.regex.Pattern;
 
 import static com.rue.protobuf.SensorTypes.SENSOR_TYPES;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class DataParser {
 
     private static final String COMMA = ",";

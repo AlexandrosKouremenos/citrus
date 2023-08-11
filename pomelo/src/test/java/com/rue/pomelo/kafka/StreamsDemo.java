@@ -10,6 +10,9 @@ import static com.rue.pomelo.Pomelo.KAFKA_TOPIC_PREFIX;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
 import static org.apache.kafka.streams.StreamsConfig.NUM_STREAM_THREADS_CONFIG;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class StreamsDemo {
 
     private static final String KAFKA_TOPIC = "machine";

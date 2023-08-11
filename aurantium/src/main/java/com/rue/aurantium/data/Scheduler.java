@@ -7,6 +7,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+/**
+ * @author Alex Kouremenos
+ * */
 @EnableScheduling
 @Configuration
 public class Scheduler {

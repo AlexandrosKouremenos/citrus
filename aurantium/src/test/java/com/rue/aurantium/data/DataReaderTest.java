@@ -4,6 +4,9 @@ import protobuf.Machine;
 
 import java.util.Objects;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class DataReaderTest {
 
     public static void main(String[] args) {

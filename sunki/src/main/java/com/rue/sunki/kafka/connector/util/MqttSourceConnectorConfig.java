@@ -9,7 +9,9 @@ import static java.util.UUID.randomUUID;
 import static org.apache.kafka.clients.producer.ProducerConfig.*;
 import static org.apache.kafka.common.config.ConfigDef.Importance.*;
 import static org.apache.kafka.common.config.ConfigDef.Type.*;
-
+/**
+ * @author Alex Kouremenos
+ * */
 public class MqttSourceConnectorConfig extends AbstractConfig {
 
     public static final String MQTT_HOST = "mqtt.host";

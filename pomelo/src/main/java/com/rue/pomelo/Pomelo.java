@@ -10,6 +10,9 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.*;
 import static org.apache.kafka.streams.StreamsConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.streams.StreamsConfig.*;
 
+/**
+ * @author Alex Kouremenos
+ * */
 @Service("pomelo")
 public class Pomelo {
 

@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class MqttSourceConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttSourceConverter.class);

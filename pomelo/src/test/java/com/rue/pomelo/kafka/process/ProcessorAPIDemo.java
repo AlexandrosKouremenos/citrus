@@ -9,6 +9,9 @@ import java.util.Scanner;
 
 import static com.rue.pomelo.Pomelo.KAFKA_TOPIC_PREFIX;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class ProcessorAPIDemo {
 
     private static final String KAFKA_TOPIC = "machine";

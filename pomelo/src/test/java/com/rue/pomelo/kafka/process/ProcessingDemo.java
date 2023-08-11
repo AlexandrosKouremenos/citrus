@@ -35,6 +35,9 @@ import static java.time.Duration.ofSeconds;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
 import static org.apache.kafka.streams.StreamsConfig.NUM_STREAM_THREADS_CONFIG;
 
+/**
+ * @author Alex Kouremenos
+ * */
 // TODO: Update with the new computation method or Delete.
 public class ProcessingDemo {
 

@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class FileSourceConnector extends SourceConnector {
 
     public static final String VERSION = "test-version";

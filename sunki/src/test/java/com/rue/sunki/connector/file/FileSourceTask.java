@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class FileSourceTask extends SourceTask {
 
     private static final String FILENAME_FIELD = "filename";

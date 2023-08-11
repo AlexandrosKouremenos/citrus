@@ -13,7 +13,9 @@ import java.util.*;
 import static com.rue.sunki.kafka.connector.util.MqttSourceConnectorConfig.Version;
 import static com.rue.sunki.kafka.connector.util.MqttSourceConnectorConfig.configDef;
 
-
+/**
+ * @author Alex Kouremenos
+ * */
 public class MqttSourceConnector extends SourceConnector {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MqttSourceConnector.class);

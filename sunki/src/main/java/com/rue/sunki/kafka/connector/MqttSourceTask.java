@@ -22,6 +22,9 @@ import static com.rue.sunki.kafka.connector.util.MqttSourceConnectorConfig.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
 
+/**
+ * @author Alex Kouremenos
+ * */
 public class MqttSourceTask extends SourceTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttSourceTask.class);
