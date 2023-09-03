@@ -3,8 +3,6 @@ FROM alpine:latest
 
 RUN apk add --no-cache mosquitto mosquitto-clients
 
-COPY scripts/passwd /etc/mosquitto/
-
 EXPOSE 1883
 
 CMD ["/bin/sh", "-c", "mosquitto -c /mosquitto/config/mosquitto.conf"]

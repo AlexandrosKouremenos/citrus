@@ -1,23 +1,34 @@
 version: "3.8"
 
 services:
-  sunki:
-    image: sunki:latest
-    env_file:
-      - sunki/scripts/env.list
-    network_mode: host
-    ports:
-      - "8081:8081"
-      - "1883:1883"
 
   aurantium:
+    build:
+      context: ./aurantium
+      dockerfile: aurantium.dockerfile
+      args:
+        - data_folder=src/main/resources/iot-data/machine
     image: aurantium:latest
     env_file:
       - aurantium/scripts/env.list
     network_mode: host
 
+  sunki-mosquitto:
+    build:
+      context: ./sunki
+      dockerfile: sunki-mosquitto.dockerfile
+    image: sunki-mosquitto:latest
+
+  sunki-connector:
+    build:
+      context: ./sunki
+      dockerfile: sunki-connector.dockerfile
+    image: sunki-connector:latest
+
   pomelo:
+    build:
+      context: ./pomelo
+      dockerfile: pomelo.dockerfile
     image: pomelo:latest
     env_file:
       - pomelo/scripts/env.list
-    network_mode: host

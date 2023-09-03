@@ -31,5 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-/aurantium-experiments.dockerfile
-/scripts/mosquitto.conf

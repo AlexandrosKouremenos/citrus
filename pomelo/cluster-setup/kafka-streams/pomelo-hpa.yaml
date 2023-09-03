@@ -1,3 +1,4 @@
+# TODO: Values must match the topics exactly. If we have machine.0 and machine.1 as active topics, having machine.0 only will not work.
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -16,11 +17,13 @@ spec:
           name: kafka_lag
           selector:
 #            TODO: Support all topics starting with machine.
+#            This might be helpful: https://github.com/kubernetes/kubernetes/issues/88873
             matchExpressions:
               - key: topic
                 operator: In
                 values:
                   - machine.0
+                  - machine.1
                   - machine.2
                   - machine.3
                   - machine.4

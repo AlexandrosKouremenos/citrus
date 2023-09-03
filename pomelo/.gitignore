@@ -31,3 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
+/cluster-setup/metrics/prometheus/prometheus-adapter/

@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+/strimzi-0.34.0/
+/kafka_2.13-3.4.0/

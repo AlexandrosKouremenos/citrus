@@ -21,43 +21,59 @@ spec:
               containerPort: 9092
             - name: actuator
               containerPort: 8085
-#          resources:
-#            limits:
-#              cpu: 500m
-#            requests:
-#              cpu: 50m
           env:
             - name: fetch.max.bytes
-              value: '524288000'
+              valueFrom:
+                configMapKeyRef:
+                  name: pomelo-conf
+                  key: fetch.max.bytes
+                  optional: false
             - name: max.partition.fetch.bytes
-              value: '104857600'
+              valueFrom:
+                configMapKeyRef:
+                  name: pomelo-conf
+                  key: max.partition.fetch.bytes
+                  optional: false
+            - name: connections.max.idle.ms
+              valueFrom:
+                configMapKeyRef:
+                  name: pomelo-conf
+                  key: connections.max.idle.ms
+                  optional: false
             - name: fetch.max.wait.ms
-              value: '500'
+              valueFrom:
+                configMapKeyRef:
+                  name: pomelo-conf
+                  key: fetch.max.wait.ms
+                  optional: false
             - name: topology.optimize
-              value: 'all'
+              valueFrom:
+                configMapKeyRef:
+                  name: pomelo-conf
+                  key: topology.optimize
+                  optional: false
             - name: kafka.bootstrap.servers
               valueFrom:
-                secretKeyRef:
-                  name: pomelo-secret
+                configMapKeyRef:
+                  name: pomelo-conf
                   key: kafka.bootstrap.servers
                   optional: false
             - name: kafka.group.id
               valueFrom:
-                secretKeyRef:
-                  name: pomelo-secret
+                configMapKeyRef:
+                  name: pomelo-conf
                   key: kafka.group.id
                   optional: false
             - name: kafka.topic
               valueFrom:
-                secretKeyRef:
-                  name: pomelo-secret
+                configMapKeyRef:
+                  name: pomelo-conf
                   key: kafka.topic
                   optional: false
             - name: num.threads
-#              value: '1'
               valueFrom:
-                secretKeyRef:
-                  name: pomelo-secret
+                configMapKeyRef:
+                  name: pomelo-conf
                   key: num.threads
                   optional: false
       restartPolicy: Always

@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import static org.apache.kafka.clients.consumer.ConsumerConfig.*;
 import static org.apache.kafka.streams.StreamsConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.streams.StreamsConfig.CONNECTIONS_MAX_IDLE_MS_CONFIG;
 import static org.apache.kafka.streams.StreamsConfig.*;
 
 /**
@@ -34,6 +35,9 @@ public class Pomelo {
             System.getenv("max.partition.fetch.bytes");
 
     private static final String FETCH_MAX_WAIT_MS_ENV = System.getenv("fetch.max.wait.ms");
+
+    private static final String CONNECTIONS_MAX_IDLE_MS_ENV =
+            System.getenv("connections.max.idle.ms");
 
     static {
 
@@ -62,6 +66,9 @@ public class Pomelo {
 
         if (FETCH_MAX_WAIT_MS_ENV != null)
             PROPS.setProperty(FETCH_MAX_WAIT_MS_CONFIG, FETCH_MAX_WAIT_MS_ENV);
+
+        if (CONNECTIONS_MAX_IDLE_MS_ENV != null)
+            PROPS.setProperty(CONNECTIONS_MAX_IDLE_MS_CONFIG, CONNECTIONS_MAX_IDLE_MS_ENV);
 
         PROPS.setProperty(KAFKA_TOPIC_PREFIX, System.getenv("kafka.topic"));
 

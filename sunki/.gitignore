@@ -31,8 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-/scripts/env.list
-/scripts/mosquitto.conf
-/scripts/passwd
-/src/test/java/com/rue/sunki/connector/MyConnector.java
-/src/test/java/com/rue/sunki/connector/MySourceTask.java

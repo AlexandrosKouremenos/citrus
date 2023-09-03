@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pomelo-conf
+data:
+  fetch.max.bytes: '524288000'
+  max.partition.fetch.bytes: '104857600'
+  connections.max.idle.ms: '36000000'
+  fetch.max.wait.ms: '500'
+  topology.optimize: 'all'
+  kafka.bootstrap.servers: 'pomelo-cluster-kafka-bootstrap:9092'
+  kafka.group.id: 'pomelo-stream-client'
+  kafka.topic: 'machine'
+  num.threads: '2'

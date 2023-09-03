@@ -19,7 +19,7 @@ nodes:
       - containerPort: 1883
         hostPort: 1883
         protocol: TCP
-  - role: worker
+#  - role: worker
 #  - role: worker
 #  - role: worker
 containerdConfigPatches:
