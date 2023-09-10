@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.rue.sunki.kafka.connector.MqttSourceConverter.convert;
 import static com.rue.sunki.kafka.connector.util.MqttSourceConnectorConfig.*;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
 
 /**
@@ -63,10 +62,6 @@ public class MqttSourceTask extends SourceTask {
     private void connect() {
 
         mqttClient.connectWith()
-                .simpleAuth()
-                .username(sourceConnectorConfig.getString(MQTT_USERNAME))
-                .password(UTF_8.encode(sourceConnectorConfig.getString(MQTT_PASSWORD)))
-                .applySimpleAuth()
                 .send()
                 .whenComplete((mqtt5ConnAck, throwable) -> {
                     if (throwable != null) LOGGER.error("Unable to connect to broker.", throwable);

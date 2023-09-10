@@ -9,18 +9,12 @@ import protobuf.SensorValue;
 import java.util.Scanner;
 import java.util.UUID;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 /**
  * @author Alex Kouremenos
  * */
 public class PublishMachineTest {
 
     private static final String HOST = System.getenv("mqtt.host");
-
-    private static final String USERNAME = System.getenv("mqtt.username");
-
-    private static final String PASSWORD = System.getenv("mqtt.password");
 
     private static Mqtt5AsyncClient client;
 
@@ -92,10 +86,6 @@ public class PublishMachineTest {
     public static void pub(Machine machine) {
 
         client.connectWith()
-                .simpleAuth()
-                .username(USERNAME)
-                .password(UTF_8.encode(PASSWORD))
-                .applySimpleAuth()
                 .send()
                 .thenAccept(connAck -> System.out.println("connected " + connAck))
                 .thenCompose(v -> client

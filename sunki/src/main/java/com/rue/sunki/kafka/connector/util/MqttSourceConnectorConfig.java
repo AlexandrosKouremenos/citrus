@@ -26,12 +26,6 @@ public class MqttSourceConnectorConfig extends AbstractConfig {
     public static final String MQTT_TOPIC_PREFIX = "mqtt.topic.prefix";
     public static final String MQTT_TOPIC_DOC = "Prefix of MQTT topics.";
 
-    public static final String MQTT_USERNAME = "mqtt.username";
-    public static final String MQTT_USERNAME_DOC = "Username for MQTT authentication.";
-
-    public static final String MQTT_PASSWORD = "mqtt.password";
-    public static final String MQTT_PASSWORD_DOC = "Password for MQTT authentication.";
-
     public static final String KAFKA_TOPIC = "kafka.topic";
     public static final String KAFKA_TOPIC_DOC = "Kafka topic.";
 
@@ -57,8 +51,6 @@ public class MqttSourceConnectorConfig extends AbstractConfig {
                 .define(MQTT_CLIENT_ID, STRING, randomUUID().toString(), HIGH, MQTT_CLIENT_ID_DOC)
                 .define(MQTT_TOPIC_PREFIX, STRING, HIGH, MQTT_TOPIC_DOC)
                 .define(KAFKA_TOPIC, STRING, HIGH, KAFKA_TOPIC_DOC)
-                .define(MQTT_USERNAME, STRING, MEDIUM, MQTT_USERNAME_DOC)
-                .define(MQTT_PASSWORD, STRING, MEDIUM, MQTT_PASSWORD_DOC)
                 .define(ACKS_CONFIG, STRING, ACKS_CONF, LOW, ACKS_DOC)
                 .define(BATCH_SIZE_CONFIG, STRING, BATCH_SIZE_CONF, LOW, BATCH_SIZE_DOC)
                 .define(LINGER_MS_CONFIG, LONG, LINGER_MS_CONF, MEDIUM, LINGER_MS_CONF_DOC);

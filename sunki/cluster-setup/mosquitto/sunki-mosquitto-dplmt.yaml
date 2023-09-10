@@ -28,18 +28,6 @@ spec:
                   name: sunki-mqtt-host
                   key: mqtt.host
                   optional: false
-            - name: mqtt.username
-              valueFrom:
-                secretKeyRef:
-                  name: sunki-secret
-                  key: mqtt.username
-                  optional: false
-            - name: mqtt.password
-              valueFrom:
-                secretKeyRef:
-                  name: sunki-secret
-                  key: mqtt.password
-                  optional: false
           volumeMounts:
             - mountPath: /mosquitto/config/mosquitto.conf
               name: sunki-configmap

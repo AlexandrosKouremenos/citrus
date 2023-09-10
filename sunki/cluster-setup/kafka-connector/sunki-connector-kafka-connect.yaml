@@ -23,9 +23,3 @@ spec:
     status.storage.replication.factor: 3
     config.providers: file
     config.providers.file.class: org.apache.kafka.common.config.provider.FileConfigProvider
-#    config.providers.file.path: /opt/kafka/external-configuration/mqtt-credentials/mqtt.properties
-  externalConfiguration:
-    volumes:
-      - name: mqtt-credentials
-        secret:
-          secretName: sunki-secret

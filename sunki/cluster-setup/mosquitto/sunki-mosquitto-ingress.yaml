@@ -3,14 +3,8 @@ kind: Ingress
 metadata:
   name: sunki-ingress
 spec:
-#  defaultBackend:
-#    service:
-#      name: sunki-service
-#      port:
-#        name: broker
   ingressClassName: nginx
   rules:
-#    - host: sunki.ingress
     - http:
         paths:
           - pathType: Prefix

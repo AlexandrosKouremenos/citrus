@@ -34,6 +34,5 @@ build/
 /scripts/env.list
 /scripts/mosquitto.conf
 /scripts/passwd
-/cluster-setup/mosquitto/sunki-mosquitto-secret.yaml
 /src/test/java/com/rue/sunki/connector/MyConnector.java
 /src/test/java/com/rue/sunki/connector/MySourceTask.java

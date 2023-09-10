@@ -63,8 +63,6 @@ done
 
 cd ~/Repos/citrus/sunki/cluster-setup/ || exit
 
-kubectl apply -f mosquitto/sunki-mosquitto-secret.yaml
-
 kubectl apply -f mosquitto/sunki-mosquitto-config-map.yaml
 
 kubectl apply -f mosquitto/sunki-mosquitto-dplmt.yaml

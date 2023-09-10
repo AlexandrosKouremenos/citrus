@@ -16,7 +16,6 @@ import java.net.InetSocketAddress;
 import java.util.UUID;
 
 import static com.rue.aurantium.mqtt.MachineTopic.getMachineTopic;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author Alex Kouremenos
@@ -26,10 +25,6 @@ public class AurantiumClient extends DataPublisher {
     private static final Logger LOGGER = LoggerFactory.getLogger(AurantiumClient.class);
 
     private static final String HOST = System.getenv("mqtt.host");
-
-    private static final String USERNAME = System.getenv("mqtt.username");
-
-    private static final String PASSWORD = System.getenv("mqtt.password");
 
     private static final int PORT = 1883;
 
@@ -67,10 +62,6 @@ public class AurantiumClient extends DataPublisher {
     private void connectClient() {
 
         client.connectWith()
-                .simpleAuth()
-                .username(USERNAME)
-                .password(UTF_8.encode(PASSWORD))
-                .applySimpleAuth()
                 .send()
                 .whenComplete((mqtt5ConnAck, throwable) -> {
                     if (throwable != null) LOGGER.error("Unable to connect to broker.", throwable);

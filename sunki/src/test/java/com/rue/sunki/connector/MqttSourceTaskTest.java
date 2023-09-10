@@ -19,8 +19,6 @@ public class MqttSourceTaskTest {
 
         props.put(MQTT_HOST, System.getenv("mqtt.host"));
         props.put(MQTT_PORT, "1883");
-        props.put(MQTT_USERNAME, System.getenv("mqtt.username"));
-        props.put(MQTT_PASSWORD, System.getenv("mqtt.password"));
         props.put(MQTT_TOPIC_PREFIX, "mqtt-test");
         props.put(KAFKA_TOPIC, "test-kafka");
 
