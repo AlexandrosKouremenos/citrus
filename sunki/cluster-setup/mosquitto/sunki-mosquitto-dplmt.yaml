@@ -24,8 +24,8 @@ spec:
           env:
             - name: mqtt.host
               valueFrom:
-                secretKeyRef:
-                  name: sunki-secret
+                configMapKeyRef:
+                  name: sunki-mqtt-host
                   key: mqtt.host
                   optional: false
             - name: mqtt.username
@@ -47,7 +47,7 @@ spec:
       volumes:
         - name: sunki-configmap
           configMap:
-            name: sunki-conf
+            name: sunki-mqtt-conf
       restartPolicy: Always
   selector:
     matchLabels:

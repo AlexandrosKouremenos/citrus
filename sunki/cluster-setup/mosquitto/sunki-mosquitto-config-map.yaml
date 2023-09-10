@@ -1,9 +1,16 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: sunki-conf
+  name: sunki-mqtt-conf
 data:
   mosquitto.conf: |
     listener 1883 0.0.0.0
     password_file /etc/mosquitto/passwd
     allow_anonymous false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sunki-mqtt-host
+data:
+  mqtt.host: 'sunki-service'
