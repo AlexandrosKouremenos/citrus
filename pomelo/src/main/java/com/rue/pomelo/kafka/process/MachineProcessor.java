@@ -41,7 +41,8 @@ public class MachineProcessor implements Processor<String, Bytes, String, Machin
         try {
 
             machine = Machine.parseFrom(record.value().get());
-            LOGGER.info("Successfully parsed incoming machine data for [{}].", machine.getId());
+            LOGGER.info("Parsed incoming machine data for topic [{}] with [{}] ms offset.",
+                    machine.getId(), System.currentTimeMillis() - machine.getTimestamp());
 
         }
         catch (InvalidProtocolBufferException e) {

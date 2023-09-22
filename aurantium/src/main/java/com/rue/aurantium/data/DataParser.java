@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.rue.protobuf.SensorTypes.SENSOR_TYPES;
+import static java.lang.System.currentTimeMillis;
 
 /**
  * @author Alex Kouremenos
@@ -50,7 +51,7 @@ public class DataParser {
             machineBuilder.addSensorValues(sensorValue);
 
         }
-
+        machineBuilder.setTimestamp(currentTimeMillis());
         return machineBuilder.build();
 
     }

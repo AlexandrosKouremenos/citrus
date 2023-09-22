@@ -45,7 +45,7 @@ kubectl create -f install/cluster-operator/ -n default
 
 cd ~/Repos/citrus/pomelo/cluster-setup/ || exit
 
-# TODO: We need the persistent .yaml in case of pod failure.
+# TODO: We need the persistent .yaml in case of failure.
 kubectl apply -f kafka-cluster/kafka-ephemeral.yaml
 
 echo "Waiting for Strimzi Entity Operator to complete its setup."

@@ -4,6 +4,7 @@ import com.rue.pomelo.kafka.process.MachineProcessor;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.Topology.AutoOffsetReset;
 import org.apache.kafka.streams.processor.RecordContext;
 import org.apache.kafka.streams.processor.TopicNameExtractor;
 import org.slf4j.Logger;
@@ -39,7 +40,8 @@ public class PomeloClient {
         String topicPrefix = properties.getProperty(KAFKA_TOPIC_PREFIX);
         Pattern pattern = Pattern.compile(topicPrefix + ".*");
 
-        topology.addSource("Source",
+        topology.addSource(AutoOffsetReset.LATEST,
+                "Source",
                 String().deserializer(),
                 Bytes().deserializer(),
                 pattern);

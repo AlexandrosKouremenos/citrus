@@ -8,5 +8,6 @@ message Machine {
 
   string id = 1;
   repeated SensorValue sensorValues = 2;
+  optional int64 timestamp = 3;
 
 }

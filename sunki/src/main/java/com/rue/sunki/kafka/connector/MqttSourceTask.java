@@ -114,10 +114,11 @@ public class MqttSourceTask extends SourceTask {
 
         try {
 
-            LOGGER.info("Received \n\t" +
-                    Machine.parseFrom(mqtt5Publish.getPayloadAsBytes()) +
-                    " \n from " +
-                    mqtt5Publish.getTopic());
+            long timestamp = Machine.parseFrom(mqtt5Publish.getPayloadAsBytes()).getTimestamp();
+            long offset = System.currentTimeMillis() - timestamp;
+
+            LOGGER.info("Received message from topic [{}] with [{}] ms offset.",
+                    mqtt5Publish.getTopic(), offset);
 
         } catch (InvalidProtocolBufferException e) { throw new RuntimeException(e); }
 
