@@ -114,17 +114,26 @@ docker tag sunki-connector:latest localhost:${reg_port}/sunki-connector:latest
 
 docker push localhost:${reg_port}/sunki-connector:latest
 
-echo "*** Waiting for Pomelo to complete its setup. ***"
+strimzi_context="pomelo"
+
+if [ "$1" == "standalone" ]; then
+
+  source ../src/test/sunki-standalone/strimzi-setup.sh
+  strimzi_context="sunki"
+
+fi
+
+echo "*** Waiting for bootstrap servers to be configured. ***"
 
 bootstrapServers=""
 while [ -z "$bootstrapServers" ]; do
 
-  bootstrapServers=$(kubectl --context=kind-pomelo-cluster get kafka pomelo-cluster -o=jsonpath='{.status.listeners[?(@.name=="external")].bootstrapServers}{"\n"}')
+  bootstrapServers=$(kubectl --context=kind-"${strimzi_context}"-cluster get kafka "${strimzi_context}"-cluster -o=jsonpath='{.status.listeners[?(@.name=="external")].bootstrapServers}{"\n"}')
   sleep 5
 
 done
 
-echo "*** Pomelo setup complete. Found bootstrap servers: $bootstrapServers ***"
+echo "*** Found bootstrap servers: $bootstrapServers ***"
 
 sed -i "s|bootstrapServers: .*|bootstrapServers: $bootstrapServers|g" cluster-setup/kafka-connector/sunki-connector-kafka-connect.yaml
 
