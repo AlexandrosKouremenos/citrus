@@ -16,7 +16,7 @@ public class DataReaderTest {
                         .getResource("iot-data"))
                 .getFile();
 
-        Parser parser = new Parser(filePath + "/machine0-short");
+        Parser parser = new Parser(filePath + "/machine-short");
         parser.start();
 
     }

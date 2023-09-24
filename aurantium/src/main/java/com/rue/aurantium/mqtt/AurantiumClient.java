@@ -15,8 +15,6 @@ import protobuf.Machine;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 
-import static com.rue.aurantium.mqtt.MachineTopic.getMachineTopic;
-
 /**
  * @author Alex Kouremenos
  * */
@@ -26,7 +24,9 @@ public class AurantiumClient extends DataPublisher {
 
     private static final String HOST = System.getenv("mqtt.host");
 
-    private static final int PORT = 1883;
+    public static final String MACHINE_TOPIC = "machine/" + System.getenv("machine.id");
+
+    private static final int PORT = Integer.parseInt(System.getenv("mqtt.port"));
 
     private final Mqtt5AsyncClient client;
 
@@ -80,7 +80,7 @@ public class AurantiumClient extends DataPublisher {
     public void publish(Machine machine) {
 
         client.publishWith()
-                .topic(getMachineTopic())
+                .topic(MACHINE_TOPIC)
                 .qos(MqttQos.AT_LEAST_ONCE)
                 .payload(machine.toByteArray())
                 .send();

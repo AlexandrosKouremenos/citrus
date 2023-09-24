@@ -16,7 +16,8 @@ public class Aurantium {
     private AurantiumClient getAurantiumClient() {
 
         String filePath = System.getenv("filePath");
-//        String filePath = "/home/alex/Repos/citrus/aurantium/src/main/resources/iot-data/building0-short/dataset_2013-12-07-short.csv";
+        if (filePath == null) throw new RuntimeException("File path is null.");
+
         return new AurantiumClient(filePath);
 
     }

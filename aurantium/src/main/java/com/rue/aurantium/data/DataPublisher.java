@@ -20,7 +20,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static com.rue.aurantium.data.Scheduler.TASK_SCHEDULER;
-import static com.rue.aurantium.mqtt.MachineTopic.getMachineTopic;
+import static com.rue.aurantium.mqtt.AurantiumClient.MACHINE_TOPIC;
 import static java.lang.Long.parseLong;
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -72,7 +72,7 @@ abstract public class DataPublisher {
         ApplicationContext context = new AnnotationConfigApplicationContext(Scheduler.class);
         executor = (ScheduledExecutorService) context.getBean(TASK_SCHEDULER);
 
-        LOG.info("Starting publishing to topic [{}].", getMachineTopic());
+        LOG.info("Starting publishing to topic [{}].", MACHINE_TOPIC);
 
         BufferedReader reader = null;
         while (!queue.isEmpty()) {
