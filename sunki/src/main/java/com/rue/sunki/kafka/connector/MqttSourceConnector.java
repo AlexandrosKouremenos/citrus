@@ -1,7 +1,6 @@
 package com.rue.sunki.kafka.connector;
 
 
-import com.rue.sunki.kafka.connector.util.MqttSourceConnectorConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.source.SourceConnector;
@@ -20,16 +19,12 @@ public class MqttSourceConnector extends SourceConnector {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MqttSourceConnector.class);
 
-    private MqttSourceConnectorConfig mqttSourceConnectorConfig;
-
     private Map<String, String> configProps;
 
     @Override
     public void start(Map<String, String> props) {
 
         LOGGER.info("Starting the MQTT Source Connector.");
-
-        mqttSourceConnectorConfig = new MqttSourceConnectorConfig(props);
         configProps = Collections.unmodifiableMap(props);
 
     }

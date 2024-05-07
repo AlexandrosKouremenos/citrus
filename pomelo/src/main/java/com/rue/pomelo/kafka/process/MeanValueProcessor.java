@@ -1,5 +1,6 @@
 package com.rue.pomelo.kafka.process;
 
+import com.rue.protobuf.SensorTypes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.processor.PunctuationType;
@@ -138,8 +139,9 @@ public class MeanValueProcessor implements Processor<String, Machine, String, Li
 
                 for (SensorValue newValue : incoming) {
 
-                    if (!newValue.getId().equals("0"))
-                        newEntry.put(newValue.getId(), newValue.getMetrics());
+                    float metrics = newValue.getMetrics();
+                    String id = newValue.getId();
+                    if (!isExcludedSensorValue(newValue.getId())) newEntry.put(id, metrics);
 
                 }
 
@@ -152,11 +154,13 @@ public class MeanValueProcessor implements Processor<String, Machine, String, Li
 
                     for (SensorValue newValue : incoming) {
 
+                        float metrics = newValue.getMetrics();
                         String id = newValue.getId();
-                        if (!id.equals("0")) {
+                        if (!isExcludedSensorValue(id)) {
 
                             long windowedValuesCount = windowCounter.get(record.key());
-                            float mean = computeMean(prevValues.get(id), newValue.getMetrics(), windowedValuesCount);
+                            float mean =
+                                    computeMean(prevValues.get(id), metrics, windowedValuesCount);
                             newEntry.put(id, mean);
 
                         }
@@ -185,5 +189,10 @@ public class MeanValueProcessor implements Processor<String, Machine, String, Li
                 .build();
 
     }
+
+    /**
+     * Exclude the {@link SensorValue} that is a {@link SensorTypes}.
+     * */
+    private static boolean isExcludedSensorValue(String id) { return id.equals("0"); }
 
 }

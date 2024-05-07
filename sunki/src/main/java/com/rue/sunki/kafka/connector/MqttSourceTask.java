@@ -41,20 +41,7 @@ public class MqttSourceTask extends SourceTask {
     public void start(Map<String, String> props) {
 
         sourceConnectorConfig = new MqttSourceConnectorConfig(props);
-
-        mqttClient = Mqtt5Client.builder()
-                .serverHost(sourceConnectorConfig.getString(MQTT_HOST))
-                .serverPort(sourceConnectorConfig.getInt(MQTT_PORT))
-                .identifier(sourceConnectorConfig.getString(MQTT_CLIENT_ID))
-                .automaticReconnect()
-                .initialDelay(1, TimeUnit.SECONDS)
-                .maxDelay(10, TimeUnit.SECONDS)
-                .applyAutomaticReconnect()
-                .addConnectedListener(context -> LOGGER.info("Client received a ConnAck."))
-                .addDisconnectedListener(context ->
-                        LOGGER.warn("Client is not connected yet or will disconnect."))
-                .buildAsync();
-
+        mqttClient = createMqttClient();
         connect();
 
     }
@@ -121,6 +108,23 @@ public class MqttSourceTask extends SourceTask {
                     mqtt5Publish.getTopic(), offset);
 
         } catch (InvalidProtocolBufferException e) { throw new RuntimeException(e); }
+
+    }
+
+    private Mqtt5AsyncClient createMqttClient() {
+
+        return Mqtt5Client.builder()
+                .serverHost(sourceConnectorConfig.getString(MQTT_HOST))
+                .serverPort(sourceConnectorConfig.getInt(MQTT_PORT))
+                .identifier(sourceConnectorConfig.getString(MQTT_CLIENT_ID))
+                .automaticReconnect()
+                .initialDelay(1, TimeUnit.SECONDS)
+                .maxDelay(10, TimeUnit.SECONDS)
+                .applyAutomaticReconnect()
+                .addConnectedListener(context -> LOGGER.info("Client received a ConnAck."))
+                .addDisconnectedListener(context ->
+                        LOGGER.warn("Client is not connected yet or will disconnect."))
+                .buildAsync();
 
     }
 

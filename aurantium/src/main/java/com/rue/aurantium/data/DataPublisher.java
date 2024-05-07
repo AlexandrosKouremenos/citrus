@@ -37,7 +37,7 @@ abstract public class DataPublisher {
 
     private static final String MACHINE_ID = System.getenv("machine.id");
 
-    private static final Logger LOG = LoggerFactory.getLogger(DataPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataPublisher.class);
 
     public static boolean EOF;
 
@@ -63,7 +63,7 @@ abstract public class DataPublisher {
 
         } catch (IOException e) {
 
-            LOG.error("Path was not a directory.");
+            LOGGER.error("Path was not a directory.");
             shutdown();
             throw new RuntimeException(e);
 
@@ -72,7 +72,7 @@ abstract public class DataPublisher {
         ApplicationContext context = new AnnotationConfigApplicationContext(Scheduler.class);
         executor = (ScheduledExecutorService) context.getBean(TASK_SCHEDULER);
 
-        LOG.info("Starting publishing to topic [{}].", MACHINE_TOPIC);
+        LOGGER.info("Starting publishing to topic [{}].", MACHINE_TOPIC);
 
         BufferedReader reader = null;
         while (!queue.isEmpty()) {
@@ -81,12 +81,12 @@ abstract public class DataPublisher {
 
             if (shuttingDown) {
 
-                LOG.info("Skipping other files.");
+                LOGGER.info("Skipping other files.");
                 break;
 
             }
 
-            LOG.info("Handling file [{}].", path);
+            LOGGER.info("Handling file [{}].", path);
 
             try {
 
@@ -117,7 +117,7 @@ abstract public class DataPublisher {
 
                 }
 
-                LOG.info("File [{}] handled.", path);
+                LOGGER.info("File [{}] handled.", path);
 
             } catch (IOException e) { throw new RuntimeException(e); }
 
@@ -127,7 +127,7 @@ abstract public class DataPublisher {
 
             try {
 
-                LOG.info("Closing reader.");
+                LOGGER.info("Closing reader.");
                 reader.close();
 
             }
@@ -135,7 +135,7 @@ abstract public class DataPublisher {
 
         }
 
-        LOG.info("Shutting down executor.");
+        LOGGER.info("Shutting down executor.");
         executor.shutdown();
         shutdown();
 

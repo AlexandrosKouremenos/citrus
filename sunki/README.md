@@ -20,10 +20,9 @@ To run locally, you need to have a Mosquitto, a Zookeeper and a Kafka broker up 
 ### Mosquitto Broker
 
 1. Create a .conf file with some simple configuration: ``` echo -e 'listener 1883 \nallow_anonymous true' >> mosquitto.conf ```.
-2. Install it locally with ```  apt install mosquitto ```.
-    1. Run it with ``` mosquitto -c {FULL_PATH_OF_CONF_FILE} ```.
-3. Use a Docker image. Pull it with ``` docker pull eclipse-mosquitto:2.0.11 ```.
-    1. Run it with ``` docker run -it -p 1883:1883 -v {FULL_PATH_OF_CONF_FILE}:/mosquitto/config/mosquitto.conf eclipse-mosquitto:2.0.11 ```.
+2. Install and run the connector:
+   1. Install it locally with ```  apt install mosquitto ```. Run it with ``` mosquitto -c {FULL_PATH_OF_CONF_FILE} ```. Or,
+   2. Use a Docker image. Pull it with ``` docker pull eclipse-mosquitto:2.0.11 ```. Run it with ``` docker run -it -p 1883:1883 -v {FULL_PATH_OF_CONF_FILE}:/mosquitto/config/mosquitto.conf eclipse-mosquitto:2.0.11 ```.
 
 ### Kafka Broker
 
